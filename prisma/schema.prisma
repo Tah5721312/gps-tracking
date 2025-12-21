@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum VehicleStatus {
+  moving
+  stopped
+  turnoff
+}
+
+model Vehicle {
+  id              Int             @id @default(autoincrement())
+  name            String
+  plateNumber     String          @unique
+  deviceImei      String          @unique
+  driverName      String?
+  driverPhone     String?
+  status          VehicleStatus   @default(turnoff)
+  lastLatitude    Float?
+  lastLongitude   Float?
+  lastSpeed       Float?
+  lastUpdate      DateTime?
+  stoppedAt       DateTime?       // وقت بدء الوقوف
+  totalStoppedTime Int            @default(0) // إجمالي وقت الوقوف بالثواني
+  createdAt       DateTime        @default(now())
+  trackingPoints  TrackingPoint[]
+  trips           Trip[]
+}
+
+model TrackingPoint {
+  id           Int      @id @default(autoincrement())
+  vehicleId    Int
+  latitude     Float
+  longitude    Float
+  speed        Float
+  batteryLevel Int
+  timestamp    DateTime
+  vehicle      Vehicle  @relation(fields: [vehicleId], references: [id])
+  
+  @@index([vehicleId, timestamp])
+}
+
+model Trip {
+  id              Int       @id @default(autoincrement())
+  vehicleId       Int
+  startTime       DateTime
+  endTime         DateTime?
+  distance        Float     @default(0)      // المسافة بالكيلومتر
+  avgSpeed        Float     @default(0)      // متوسط السرعة (كم/س)
+  maxSpeed        Float     @default(0)      // أقصى سرعة (كم/س)
+  stops           Int       @default(0)      // عدد التوقفات
+  notes           String?                   // ملاحظات إضافية (اختياري)
+  destinationLat Float?                     // خط عرض الوجهة
+  destinationLng Float?                     // خط طول الوجهة
+  destinationName String?                   // اسم الوجهة (اختياري)
+  arrivalStatus   String    @default("in_progress") // حالة الوصول: in_progress, arrived, not_set
+  arrivalTime     DateTime?                 // وقت الوصول الفعلي
+  createdAt       DateTime  @default(now())  // وقت إنشاء السجل
+  updatedAt       DateTime  @default(now()) @updatedAt  // وقت آخر تحديث
+  vehicle         Vehicle   @relation(fields: [vehicleId], references: [id])
+  
+  @@index([vehicleId, startTime])
+}
