@@ -16,14 +16,19 @@ export const metadata: Metadata = {
   },
   description: siteConfig.description,
   robots: { index: true, follow: true },
-  // !STARTERCONF this is the default favicon, you can generate your own from https://realfavicongenerator.net/
-  // ! copy to /favicon folder
+  // Favicon and manifest configuration
   icons: {
-    icon: '/favicon/favicon.ico',
-    shortcut: '/favicon/favicon-16x16.png',
-    apple: '/favicon/apple-touch-icon.png',
+    icon: [
+      { url: '/favicon/icon512_rounded.png', sizes: '512x512', type: 'image/png' },
+      { url: '/favicon/icon512_rounded.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon/icon512_rounded.png', sizes: '16x16', type: 'image/png' },
+    ],
+    shortcut: '/favicon/icon512_rounded.png',
+    apple: [
+      { url: '/favicon/icon512_rounded.png', sizes: '512x512', type: 'image/png' },
+    ],
   },
-  manifest: `/favicon/site.webmanifest`,
+  manifest: `/favicon/manifest.json`,
   openGraph: {
     url: siteConfig.url,
     title: siteConfig.title,
