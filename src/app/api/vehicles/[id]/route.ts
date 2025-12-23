@@ -6,14 +6,15 @@ async function checkAndUpdateVehicleStatus(vehicle: any) {
   const GPS_TIMEOUT_MINUTES = 5; // إذا لم يصل تحديث GPS لمدة 5 دقائق، تصبح المركبة مطفأة
   const now = new Date();
   
-  // إذا لم يكن هناك lastUpdate، المركبة مطفأة
+  // إذا لم يكن هناك lastUpdate، المركبة مطفأة مع سرعة 0
   if (!vehicle.lastUpdate) {
     if (vehicle.status !== 'turnoff') {
       await prisma.vehicle.update({
         where: { id: vehicle.id },
-        data: { status: 'turnoff' as any }
+        data: { status: 'turnoff' as any, lastSpeed: 0 }
       });
       vehicle.status = 'turnoff';
+      vehicle.lastSpeed = 0;
     }
     return vehicle;
   }
@@ -22,13 +23,14 @@ async function checkAndUpdateVehicleStatus(vehicle: any) {
   const lastUpdate = new Date(vehicle.lastUpdate);
   const minutesSinceUpdate = (now.getTime() - lastUpdate.getTime()) / (1000 * 60);
 
-  // إذا مر أكثر من 5 دقائق بدون تحديث، تصبح المركبة مطفأة
+  // إذا مر أكثر من 5 دقائق بدون تحديث، تصبح المركبة مطفأة وتُصفّر السرعة
   if (minutesSinceUpdate > GPS_TIMEOUT_MINUTES && vehicle.status !== 'turnoff') {
     await prisma.vehicle.update({
       where: { id: vehicle.id },
-      data: { status: 'turnoff' as any }
+      data: { status: 'turnoff' as any, lastSpeed: 0 }
     });
     vehicle.status = 'turnoff';
+    vehicle.lastSpeed = 0;
   }
 
   return vehicle;
