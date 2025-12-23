@@ -1,6 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+// دالة للتحقق من آخر تحديث GPS وتحديث الحالة تلقائياً
+async function checkAndUpdateVehicleStatus(vehicle: any) {
+  const GPS_TIMEOUT_MINUTES = 5; // إذا لم يصل تحديث GPS لمدة 5 دقائق، تصبح المركبة مطفأة
+  const now = new Date();
+  
+  // إذا لم يكن هناك lastUpdate، المركبة مطفأة
+  if (!vehicle.lastUpdate) {
+    if (vehicle.status !== 'turnoff') {
+      await prisma.vehicle.update({
+        where: { id: vehicle.id },
+        data: { status: 'turnoff' as any }
+      });
+      vehicle.status = 'turnoff';
+    }
+    return vehicle;
+  }
+
+  // حساب الفرق بالدقائق
+  const lastUpdate = new Date(vehicle.lastUpdate);
+  const minutesSinceUpdate = (now.getTime() - lastUpdate.getTime()) / (1000 * 60);
+
+  // إذا مر أكثر من 5 دقائق بدون تحديث، تصبح المركبة مطفأة
+  if (minutesSinceUpdate > GPS_TIMEOUT_MINUTES && vehicle.status !== 'turnoff') {
+    await prisma.vehicle.update({
+      where: { id: vehicle.id },
+      data: { status: 'turnoff' as any }
+    });
+    vehicle.status = 'turnoff';
+  }
+
+  return vehicle;
+}
+
 // GET: جلب مركبة محددة
 export async function GET(
   request: NextRequest,
@@ -19,7 +52,21 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ vehicle });
+    // جلب آخر نقطة تتبع
+    const lastTrackingPoint = await prisma.trackingPoint.findFirst({
+      where: { vehicleId: parseInt(id) },
+      orderBy: { timestamp: 'desc' }
+    });
+
+    // التحقق من آخر تحديث GPS وتحديث الحالة تلقائياً
+    const updatedVehicle = await checkAndUpdateVehicleStatus(vehicle);
+
+    return NextResponse.json({ 
+      vehicle: {
+        ...updatedVehicle,
+        latestTrackingPoint: lastTrackingPoint
+      }
+    });
   } catch (error) {
     console.error('Error fetching vehicle:', error);
     return NextResponse.json(

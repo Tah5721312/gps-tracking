@@ -122,7 +122,10 @@ export default function TripsTab({ vehicles, onTripUpdate }: TripsTabProps) {
         avgSpeed: parseFloat(formData.avgSpeed || '0'),
         maxSpeed: parseFloat(formData.maxSpeed || '0'),
         stops: parseInt(formData.stops || '0'),
-        notes: formData.notes || null
+        notes: formData.notes || null,
+        destinationLat: formData.destinationLat ? parseFloat(formData.destinationLat) : null,
+        destinationLng: formData.destinationLng ? parseFloat(formData.destinationLng) : null,
+        destinationName: formData.destinationName || null
       };
 
       if (editingTrip) {

@@ -40,6 +40,12 @@ export default function MapComponent({ vehicles, selectedVehicle, onVehicleClick
         // التحقق مرة أخرى قبل التهيئة (للتأكد من عدم التهيئة المزدوجة)
         if (mapRef.current || !mapContainerRef.current) return;
 
+        // انتظار حتى يكون الـ DOM جاهزاً
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // التحقق مرة أخرى
+        if (mapRef.current || !mapContainerRef.current) return;
+
         // تحميل CSS
         await import('leaflet/dist/leaflet.css');
         
@@ -60,13 +66,23 @@ export default function MapComponent({ vehicles, selectedVehicle, onVehicleClick
         if (!mapContainerRef.current || mapRef.current) return;
 
         // إنشاء الخريطة
-        mapRef.current = L.map(mapContainerRef.current).setView([30.0444, 31.2357], 12);
+        mapRef.current = L.map(mapContainerRef.current, {
+          zoomControl: true,
+          attributionControl: true
+        }).setView([30.0444, 31.2357], 12);
 
         // إضافة طبقة الخريطة من OpenStreetMap
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '© OpenStreetMap contributors',
           maxZoom: 19,
         }).addTo(mapRef.current);
+
+        // التأكد من أن الخريطة تعرض بشكل صحيح
+        setTimeout(() => {
+          if (mapRef.current) {
+            mapRef.current.invalidateSize();
+          }
+        }, 200);
 
         console.log('Map initialized, adding vehicles:', vehicles);
         // إضافة المركبات بعد تهيئة الخريطة
@@ -120,6 +136,20 @@ export default function MapComponent({ vehicles, selectedVehicle, onVehicleClick
     }
   }, [selectedVehicle]);
 
+  // تحديث حجم الخريطة عند تغيير حجم النافذة
+  useEffect(() => {
+    const handleResize = () => {
+      if (mapRef.current) {
+        setTimeout(() => {
+          mapRef.current?.invalidateSize();
+        }, 100);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // دالة مساعدة لإنشاء محتوى Popup
   const createPopupContent = (vehicle: Vehicle) => {
     return `
@@ -136,6 +166,37 @@ export default function MapComponent({ vehicles, selectedVehicle, onVehicleClick
           'مطفأة'
         }</p>
         <p style="margin: 4px 0; font-size: 11px; color: #666;"><strong>آخر تحديث:</strong> ${vehicle.lastUpdate.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}</p>
+        <button id="track-btn-${vehicle.id}" style="
+          width: 100%;
+          margin-top: 8px;
+          padding: 8px 16px;
+          background-color: #3b82f6;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 500;
+          transition: background-color 0.2s;
+        " onmouseover="this.style.backgroundColor='#2563eb'" onmouseout="this.style.backgroundColor='#3b82f6'" onclick="window.location.href='/tracking?vehicleId=${vehicle.id}'">
+          تتبع المركبة
+        </button>
+
+        <button id="playback-btn-${vehicle.id}" style="
+          width: 100%;
+          margin-top: 8px;
+          padding: 8px 16px;
+          background-color: #0ea5e9;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 500;
+          transition: background-color 0.2s;
+        " onmouseover="this.style.backgroundColor='#0284c7'" onmouseout="this.style.backgroundColor='#0ea5e9'" onclick="window.location.href='/playback?vehicleId=${vehicle.id}'">
+          تشغيل المسار
+        </button>
       </div>
     `;
   };
@@ -210,7 +271,13 @@ export default function MapComponent({ vehicles, selectedVehicle, onVehicleClick
     <div 
       ref={mapContainerRef} 
       className="w-full h-full"
-      style={{ zIndex: 0 }}
+      style={{ 
+        zIndex: 0,
+        minHeight: '600px',
+        height: '100%',
+        width: '100%',
+        position: 'relative'
+      }}
     />
   );
 }

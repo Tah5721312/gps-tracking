@@ -188,7 +188,7 @@ export default function MapTab({
         </div>
 
         {/* الخريطة - Leaflet + OpenStreetMap */}
-        <div className="lg:col-span-4 rounded-lg h-150 relative overflow-hidden border-2 border-gray-300 shadow-lg">
+        <div className="lg:col-span-4 rounded-lg min-h-[600px] h-[600px] relative overflow-hidden border-2 border-gray-300 shadow-lg">
           <MapComponent 
             vehicles={vehicles} 
             selectedVehicle={selectedVehicle}

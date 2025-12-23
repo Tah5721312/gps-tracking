@@ -1,6 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+// دالة للتحقق من آخر تحديث GPS وتحديث الحالة تلقائياً
+async function checkAndUpdateVehicleStatus(vehicle: any) {
+  const GPS_TIMEOUT_MINUTES = 5; // إذا لم يصل تحديث GPS لمدة 5 دقائق، تصبح المركبة مطفأة
+  const now = new Date();
+  
+  // إذا لم يكن هناك lastUpdate، المركبة مطفأة
+  if (!vehicle.lastUpdate) {
+    if (vehicle.status !== 'turnoff') {
+      await prisma.vehicle.update({
+        where: { id: vehicle.id },
+        data: { status: 'turnoff' as any }
+      });
+      vehicle.status = 'turnoff';
+    }
+    return vehicle;
+  }
+
+  // حساب الفرق بالدقائق
+  const lastUpdate = new Date(vehicle.lastUpdate);
+  const minutesSinceUpdate = (now.getTime() - lastUpdate.getTime()) / (1000 * 60);
+
+  // إذا مر أكثر من 5 دقائق بدون تحديث، تصبح المركبة مطفأة
+  if (minutesSinceUpdate > GPS_TIMEOUT_MINUTES && vehicle.status !== 'turnoff') {
+    await prisma.vehicle.update({
+      where: { id: vehicle.id },
+      data: { status: 'turnoff' as any }
+    });
+    vehicle.status = 'turnoff';
+  }
+
+  return vehicle;
+}
+
 // GET: جلب جميع المركبات
 export async function GET(request: NextRequest) {
   try {
@@ -11,16 +44,21 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // جلب آخر نقطة تتبع لكل مركبة
+    // جلب آخر نقطة تتبع لكل مركبة والتحقق من الحالة
     const vehiclesWithTracking = await Promise.all(
       vehicles.map(async (vehicle: { id: number }) => {
         const lastTrackingPoint = await prisma.trackingPoint.findFirst({
           where: { vehicleId: vehicle.id },
           orderBy: { timestamp: 'desc' }
         });
+        
+        // التحقق من آخر تحديث GPS وتحديث الحالة تلقائياً
+        const updatedVehicle = await checkAndUpdateVehicleStatus(vehicle);
+        
         return {
-          ...vehicle,
-          trackingPoints: lastTrackingPoint ? [lastTrackingPoint] : []
+          ...updatedVehicle,
+          trackingPoints: lastTrackingPoint ? [lastTrackingPoint] : [],
+          latestTrackingPoint: lastTrackingPoint
         };
       })
     );

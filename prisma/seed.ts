@@ -81,31 +81,84 @@ async function main() {
 
   console.log(`✅ تم إضافة ${vehicles.length} مركبة`);
 
-  // إضافة نقاط تتبع للمركبات
+  // إضافة نقاط تتبع متعددة الأيام لكل مركبة
   const trackingPoints = [];
-  for (const vehicle of vehicles) {
-    // إضافة 5 نقاط تتبع لكل مركبة
-    for (let i = 0; i < 5; i++) {
-      const timestamp = new Date();
-      timestamp.setMinutes(timestamp.getMinutes() - i * 10);
-      
-      trackingPoints.push(
-        prisma.trackingPoint.create({
-          data: {
-            vehicleId: vehicle.id,
-            latitude: vehicle.lastLatitude! + (Math.random() - 0.5) * 0.01,
-            longitude: vehicle.lastLongitude! + (Math.random() - 0.5) * 0.01,
-            speed: (vehicle.status === 'moving' || vehicle.status === 'MOVING') ? Math.random() * 80 : 0,
-            batteryLevel: Math.floor(Math.random() * 30) + 70,
-            timestamp: timestamp,
-          },
-        })
-      );
-    }
-  }
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const dayOffsets = [0, -1, -2, -3, -4]; // اليوم، أمس، أول أمس... حتى 4 أيام قبل
+
+  const buildRoute = (baseLat: number, baseLng: number, startMinute = 8 * 60) => ([
+    { lat: baseLat, lng: baseLng, speed: 40, minutes: startMinute + 0 },
+    { lat: baseLat + 0.004, lng: baseLng + 0.003, speed: 42, minutes: startMinute + 10 },
+    { lat: baseLat + 0.006, lng: baseLng + 0.007, speed: 0.2, minutes: startMinute + 22 }, // توقف قصير
+    { lat: baseLat + 0.010, lng: baseLng + 0.012, speed: 48, minutes: startMinute + 38 },
+    { lat: baseLat + 0.013, lng: baseLng + 0.016, speed: 0, minutes: startMinute + 55 }, // توقف واضح
+    { lat: baseLat + 0.017, lng: baseLng + 0.018, speed: 50, minutes: startMinute + 70 },
+    { lat: baseLat + 0.019, lng: baseLng + 0.014, speed: 32, minutes: startMinute + 85 },
+    { lat: baseLat + 0.021, lng: baseLng + 0.009, speed: 0.5, minutes: startMinute + 100 }, // توقف قصير
+    { lat: baseLat + 0.022, lng: baseLng + 0.003, speed: 37, minutes: startMinute + 115 },
+    { lat: baseLat + 0.023, lng: baseLng - 0.002, speed: 44, minutes: startMinute + 130 },
+  ]);
+
+  vehicles.forEach((vehicle, idx) => {
+    // أيام حديثة (أسبوع حالي)
+    dayOffsets.forEach(offset => {
+      const baseLat = (vehicle.lastLatitude || 30.0444) + idx * 0.005 + offset * 0.0005;
+      const baseLng = (vehicle.lastLongitude || 31.2357) + idx * 0.005 - offset * 0.0005;
+      const startMinute = 7 * 60 + idx * 20; // تباين وقت البدء لكل مركبة
+      const route = buildRoute(baseLat, baseLng, startMinute);
+
+      route.forEach(point => {
+        const ts = new Date(today);
+        ts.setDate(ts.getDate() + offset);
+        ts.setMinutes(point.minutes);
+        trackingPoints.push(
+          prisma.trackingPoint.create({
+            data: {
+              vehicleId: vehicle.id,
+              latitude: point.lat,
+              longitude: point.lng,
+              speed: point.speed,
+              batteryLevel: Math.floor(Math.random() * 20) + 70,
+              timestamp: ts,
+            },
+          })
+        );
+      });
+    });
+
+    // أيام أقدم في نوفمبر (لتجربة فلترة الأشهر)
+    const novemberDays = [5, 10, 15, 20, 25];
+    novemberDays.forEach(day => {
+      const baseLat = (vehicle.lastLatitude || 30.0444) + idx * 0.004 + day * 0.0001;
+      const baseLng = (vehicle.lastLongitude || 31.2357) + idx * 0.004 - day * 0.0001;
+      const startMinute = 8 * 60 + idx * 15;
+      const route = buildRoute(baseLat, baseLng, startMinute);
+
+      route.forEach(point => {
+        const ts = new Date(today);
+        ts.setMonth(10); // نوفمبر (صفرية)
+        ts.setDate(day);
+        ts.setMinutes(point.minutes);
+        trackingPoints.push(
+          prisma.trackingPoint.create({
+            data: {
+              vehicleId: vehicle.id,
+              latitude: point.lat,
+              longitude: point.lng,
+              speed: point.speed,
+              batteryLevel: Math.floor(Math.random() * 20) + 70,
+              timestamp: ts,
+            },
+          })
+        );
+      });
+    });
+  });
 
   await Promise.all(trackingPoints);
-  console.log(`✅ تم إضافة ${trackingPoints.length} نقطة تتبع`);
+  console.log(`✅ تم إضافة ${trackingPoints.length} نقطة تتبع (عدة أيام لكل مركبة)`);
 
   // إضافة رحلات تجريبية
   const trips = [];
