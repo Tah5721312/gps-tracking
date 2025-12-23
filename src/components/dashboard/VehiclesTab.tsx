@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Plus, Edit, Trash2, X, Save } from 'lucide-react';
 import VehiclesModel from './VeheclesModel';
+import { apiFetch } from '@/lib/api';
 
 interface Vehicle {
   id: number;
@@ -39,7 +40,7 @@ export default function VehiclesTab({
     if (editingVehicle) {
       // تحديث مركبة
       try {
-        const response = await fetch(`/api/vehicles/${editingVehicle.id}`, {
+        const response = await apiFetch(`/api/vehicles/${editingVehicle.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -66,7 +67,7 @@ export default function VehiclesTab({
         return;
       }
       try {
-        const response = await fetch('/api/vehicles', {
+        const response = await apiFetch('/api/vehicles', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData)
@@ -89,7 +90,7 @@ export default function VehiclesTab({
   const handleDelete = async (vehicleId: number, vehicleName: string) => {
     if (confirm(`هل أنت متأكد من حذف المركبة "${vehicleName}"؟`)) {
       try {
-        const response = await fetch(`/api/vehicles/${vehicleId}`, {
+        const response = await apiFetch(`/api/vehicles/${vehicleId}`, {
           method: 'DELETE'
         });
         if (response.ok) {
@@ -112,7 +113,7 @@ export default function VehiclesTab({
 
   const handleSaveModal = async (vehicle: Vehicle) => {
     try {
-      const response = await fetch(`/api/vehicles/${vehicle.id}`, {
+      const response = await apiFetch(`/api/vehicles/${vehicle.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

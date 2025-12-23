@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "eslint src --fix && pnpm format",
@@ -14,6 +14,7 @@
     "test": "jest",
     "format": "prettier -w .",
     "format:check": "prettier -c .",
+    "postinstall": "prisma generate",
     "postbuild": "next-sitemap --config next-sitemap.config.js",
     "prepare": "husky install",
     "db:seed": "tsx prisma/seed.ts"
@@ -44,6 +45,7 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^15.0.7",
     "@types/leaflet": "^1.9.21",
+    "@types/node": "^25.0.3",
     "@types/react": "^19.1.8",
     "@types/testing-library__jest-dom": "^5.14.9",
     "@typescript-eslint/eslint-plugin": "^5.62.0",

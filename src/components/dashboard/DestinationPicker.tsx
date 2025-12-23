@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { MapPin, Search, X, Loader2 } from 'lucide-react';
 import type L from 'leaflet';
+import { apiFetch } from '@/lib/api';
 
 interface DestinationPickerProps {
   destinationLat: string;
@@ -178,7 +179,7 @@ export default function DestinationPicker({
   // البحث العكسي (Reverse Geocoding) - الحصول على اسم المكان من الإحداثيات
   const reverseGeocode = useCallback(async (lat: number, lng: number) => {
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=ar`,
         {
           headers: {
@@ -231,7 +232,7 @@ export default function DestinationPicker({
     setIsSearching(true);
     try {
       // استخدام بحث محسّن مع دعم اللغة العربية
-      const response = await fetch(
+      const response = await apiFetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=10&addressdetails=1&accept-language=ar&countrycodes=eg&bounded=1&viewbox=31.0,29.5,32.0,30.5&extratags=1`,
         {
           headers: {

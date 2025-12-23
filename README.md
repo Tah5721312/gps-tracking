@@ -15,8 +15,8 @@
 
 This repository is 🔋 battery packed with:
 
-- ⚡️ Next.js 14 with App Router
-- ⚛️ React 18
+- ⚡️ Next.js 16 with App Router
+- ⚛️ React 19
 - ✨ TypeScript
 - 💨 Tailwind CSS 3 — Configured with CSS Variables to extend the **primary** color
 - 💎 Pre-built Components — Components that will **automatically adapt** with your brand color, [check here for the demo](https://tsnext-tw.thcl.dev/components)
@@ -103,6 +103,66 @@ Don't forget to change the package name in package.json
 ### 5. Commit Message Convention
 
 This starter is using [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/), it is mandatory to use it to commit changes.
+
+## النشر على Vercel (Deploy to Vercel)
+
+### متطلبات النشر:
+
+1. **قاعدة البيانات (Database)**:
+
+   - أنشئ قاعدة بيانات PostgreSQL على [Vercel Postgres](https://vercel.com/storage/postgres) أو [Supabase](https://supabase.com) أو أي مزود آخر
+   - احصل على `DATABASE_URL` من مزود قاعدة البيانات
+
+2. **متغيرات البيئة (Environment Variables)**:
+   في Vercel Dashboard → Settings → Environment Variables، أضف:
+
+   ```
+   DATABASE_URL=postgresql://user:password@host:5432/dbname?schema=public
+   NEXT_PUBLIC_APP_URL=https://your-app-name.vercel.app
+   ```
+
+   **ملاحظة مهمة**:
+
+   - `DATABASE_URL`: **مطلوب** - رابط قاعدة البيانات
+   - `NEXT_PUBLIC_APP_URL`: **مطلوب** - رابط التطبيق (استبدل `your-app-name` باسم تطبيقك في Vercel)
+   - بعد النشر، يمكنك الحصول على الرابط من Vercel Dashboard وتحديث `NEXT_PUBLIC_APP_URL`
+
+3. **خطوات النشر**:
+
+   أ) عبر GitHub:
+
+   - ادفع الكود إلى GitHub
+   - اربط المستودع مع Vercel
+   - Vercel سيكتشف Next.js تلقائياً
+
+   ب) عبر Vercel CLI:
+
+   ```bash
+   npm i -g vercel
+   vercel
+   ```
+
+4. **بعد النشر**:
+
+   - تأكد من تشغيل Prisma migrations:
+
+   ```bash
+   vercel env pull .env.local
+   npx prisma migrate deploy
+   ```
+
+   أو يمكنك إضافة Build Command في Vercel:
+
+   ```
+   pnpm install && pnpm prisma generate && pnpm build
+   ```
+
+### ملاحظات مهمة:
+
+- ✅ تم إضافة `postinstall` script في `package.json` لتوليد Prisma Client تلقائياً
+- ✅ `DOMAIN` في `constants.ts` يستخدم `VERCEL_URL` تلقائياً في Vercel
+- ✅ جميع ملفات API routes جاهزة للعمل
+- ✅ `apiFetch` في `src/lib/api.ts` يستخدم `DOMAIN` تلقائياً
 
 ## Projects using ts-nextjs-tailwind-starter
 

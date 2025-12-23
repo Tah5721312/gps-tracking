@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, X, Save, Calendar, MapPin, Clock, Navigation, Truck } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { apiFetch } from '@/lib/api';
 
 // تحميل DestinationPicker بشكل ديناميكي (لأنه يستخدم Leaflet)
 const DestinationPicker = dynamic(() => import('@/components/dashboard/DestinationPicker'), {
@@ -84,7 +85,7 @@ export default function TripsTab({ vehicles, onTripUpdate }: TripsTabProps) {
         url += `startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`;
       }
       
-      const response = await fetch(url);
+      const response = await apiFetch(url);
       if (response.ok) {
         const data = await response.json();
         const formattedTrips: Trip[] = data.trips.map((trip: any) => ({
@@ -130,7 +131,7 @@ export default function TripsTab({ vehicles, onTripUpdate }: TripsTabProps) {
 
       if (editingTrip) {
         // تحديث رحلة
-        const response = await fetch(`/api/trips/${editingTrip.id}`, {
+        const response = await apiFetch(`/api/trips/${editingTrip.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(tripData)
@@ -145,7 +146,7 @@ export default function TripsTab({ vehicles, onTripUpdate }: TripsTabProps) {
         }
       } else {
         // إضافة رحلة جديدة
-        const response = await fetch('/api/trips', {
+        const response = await apiFetch('/api/trips', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(tripData)
@@ -169,7 +170,7 @@ export default function TripsTab({ vehicles, onTripUpdate }: TripsTabProps) {
   const handleDelete = async (tripId: number) => {
     if (confirm('هل أنت متأكد من حذف هذه الرحلة؟')) {
       try {
-        const response = await fetch(`/api/trips/${tripId}`, {
+        const response = await apiFetch(`/api/trips/${tripId}`, {
           method: 'DELETE'
         });
         if (response.ok) {

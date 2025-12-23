@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowRight, Truck, Navigation, Battery, Gauge, MapPin, Clock, User, Phone, Activity, Radio } from 'lucide-react';
 import type L from 'leaflet';
+import { apiFetch } from '@/lib/api';
 
 interface Vehicle {
   id: number;
@@ -29,7 +30,7 @@ interface Trip {
   arrivalStatus: string;
 }
 
-export default function TrackingPage() {
+function TrackingPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const vehicleId = searchParams.get('vehicleId');
@@ -53,7 +54,7 @@ export default function TrackingPage() {
 
     try {
       setIsUpdating(true);
-      const response = await fetch(`/api/vehicles/${vehicleId}`);
+      const response = await apiFetch(`/api/vehicles/${vehicleId}`);
       if (response.ok) {
         const data = await response.json();
         const v = data.vehicle;
@@ -86,7 +87,7 @@ export default function TrackingPage() {
   // جلب اسم المكان بالعربية
   const fetchDestinationNameAr = async (lat: number, lng: number) => {
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=ar`,
         {
           headers: {
@@ -128,7 +129,7 @@ export default function TrackingPage() {
     if (!vehicleId) return;
 
     try {
-      const response = await fetch(`/api/trips?vehicleId=${vehicleId}`);
+      const response = await apiFetch(`/api/trips?vehicleId=${vehicleId}`);
       if (response.ok) {
         const data = await response.json();
         // البحث عن رحلة نشطة (بدون endTime)
@@ -350,7 +351,7 @@ export default function TrackingPage() {
     }
 
     // جلب مسار المشي من OSRM (Open Source Routing Machine)
-    fetch(`https://router.project-osrm.org/route/v1/walking/${vehicle.lng},${vehicle.lat};${trip.destinationLng},${trip.destinationLat}?overview=full&geometries=geojson`)
+    apiFetch(`https://router.project-osrm.org/route/v1/walking/${vehicle.lng},${vehicle.lat};${trip.destinationLng},${trip.destinationLat}?overview=full&geometries=geojson`)
       .then(response => response.json())
       .then(data => {
         if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
@@ -763,3 +764,17 @@ export default function TrackingPage() {
   );
 }
 
+export default function TrackingPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">جاري التحميل...</p>
+        </div>
+      </div>
+    }>
+      <TrackingPageContent />
+    </Suspense>
+  );
+}

@@ -82,7 +82,7 @@ async function main() {
   console.log(`✅ تم إضافة ${vehicles.length} مركبة`);
 
   // إضافة نقاط تتبع متعددة الأيام لكل مركبة
-  const trackingPoints = [];
+  const trackingPoints: Promise<any>[] = [];
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { MapPin, Send, Play, Pause, Square, Truck } from 'lucide-react';
+import { apiFetch } from '@/lib/api';
 
 interface Vehicle {
   id: number;
@@ -29,7 +30,7 @@ export default function GPSSimulator() {
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
-        const response = await fetch('/api/vehicles');
+        const response = await apiFetch('/api/vehicles');
         if (response.ok) {
           const data = await response.json();
           setVehicles(data.vehicles);
@@ -79,7 +80,7 @@ export default function GPSSimulator() {
     setStatus('sending');
     try {
       // استخدام القيم الحالية من refs (دائماً محدثة)
-      const response = await fetch('/api/gps', {
+      const response = await apiFetch('/api/gps', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

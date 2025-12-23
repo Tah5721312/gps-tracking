@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowRight, Calendar, Clock, Play, RotateCw, ChevronRight, ChevronLeft, AlertCircle, CheckCircle, MapPin } from 'lucide-react';
 import type L from 'leaflet';
+import { apiFetch } from '@/lib/api';
 
 interface VehicleInfo {
   id: number;
@@ -29,7 +30,7 @@ interface MovementDay {
   movingCount: number;
 }
 
-export default function PlaybackPage() {
+function PlaybackPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const vehicleId = searchParams.get('vehicleId');
@@ -203,7 +204,7 @@ export default function PlaybackPage() {
   const fetchVehicle = async () => {
     if (!vehicleId) return;
     try {
-      const response = await fetch(`/api/vehicles/${vehicleId}`);
+      const response = await apiFetch(`/api/vehicles/${vehicleId}`);
       if (!response.ok) return;
       const data = await response.json();
       setVehicle({
@@ -220,7 +221,7 @@ export default function PlaybackPage() {
   const fetchMovementDays = async () => {
     if (!vehicleId) return;
     try {
-      const res = await fetch(`/api/tracking/summary?vehicleId=${vehicleId}&days=30`);
+      const res = await apiFetch(`/api/tracking/summary?vehicleId=${vehicleId}&days=30`);
       if (!res.ok) return;
       const data = await res.json();
       const days: MovementDay[] = (data.days || []).map((d: any) => ({
@@ -251,7 +252,7 @@ export default function PlaybackPage() {
     clearMapLayers();
 
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         `/api/tracking?vehicleId=${vehicleId}&startDate=${start.toISOString()}&endDate=${end.toISOString()}&limit=2000`
       );
       if (!response.ok) {
@@ -671,3 +672,17 @@ export default function PlaybackPage() {
   );
 }
 
+export default function PlaybackPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">جاري التحميل...</p>
+        </div>
+      </div>
+    }>
+      <PlaybackPageContent />
+    </Suspense>
+  );
+}

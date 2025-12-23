@@ -6,6 +6,7 @@ import MapTab from '@/components/dashboard/MapTab';
 import ReportsTab from '@/components/dashboard/ReportsTab';
 import VehiclesTab from '@/components/dashboard/VehiclesTab';
 import TripsTab from '@/components/dashboard/TripsTab';
+import { apiFetch } from '@/lib/api';
 
 interface Vehicle {
   id: number;
@@ -149,7 +150,7 @@ export default function GPSTrackingDashboard() {
   // دالة لجلب المركبات
   const fetchVehicles = async () => {
     try {
-      const response = await fetch('/api/vehicles');
+      const response = await apiFetch('/api/vehicles');
       if (response.ok) {
         const data = await response.json();
         const formattedVehicles: Vehicle[] = data.vehicles.map(formatVehicleData);
@@ -175,7 +176,7 @@ export default function GPSTrackingDashboard() {
       const endDate = new Date(targetDate.setHours(23, 59, 59, 999)).toISOString();
       
       const vehicleIdParam = selectedVehicleFilter !== 'all' ? `&vehicleId=${selectedVehicleFilter}` : '';
-      const response = await fetch(`/api/reports/trips?startDate=${startDate}&endDate=${endDate}${vehicleIdParam}`);
+      const response = await apiFetch(`/api/reports/trips?startDate=${startDate}&endDate=${endDate}${vehicleIdParam}`);
       if (response.ok) {
         const data = await response.json();
         
@@ -230,7 +231,7 @@ export default function GPSTrackingDashboard() {
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const response = await fetch('/api/vehicles');
+        const response = await apiFetch('/api/vehicles');
         if (response.ok) {
           const data = await response.json();
           const formattedVehicles: Vehicle[] = data.vehicles.map(formatVehicleData);
@@ -395,7 +396,7 @@ export default function GPSTrackingDashboard() {
             <VehiclesTab
               vehicles={vehicles}
               onVehicleUpdate={async () => {
-                const response = await fetch('/api/vehicles');
+                const response = await apiFetch('/api/vehicles');
                 if (response.ok) {
                   const data = await response.json();
                   const formattedVehicles: Vehicle[] = data.vehicles.map(formatVehicleData);

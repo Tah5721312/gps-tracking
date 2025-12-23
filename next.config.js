@@ -5,6 +5,9 @@ const nextConfig = {
   // إعدادات Prisma للتأكد من عمله بشكل صحيح
   serverExternalPackages: ['@prisma/client', 'prisma'],
 
+  // إعدادات Turbopack (فارغة لتجنب خطأ التكوين)
+  turbopack: {},
+
   // Uncoment to add domain whitelist
   // images: {
   //   remotePatterns: [
@@ -14,11 +17,6 @@ const nextConfig = {
   //     },
   //   ]
   // },
-
-  // إعدادات Turbopack
-  turbopack: {
-    // يمكن إضافة إعدادات Turbopack هنا إذا لزم الأمر
-  },
 };
 
 module.exports = nextConfig;
