@@ -583,7 +583,7 @@ function TrackingPageContent() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* الخريطة */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 order-2 lg:order-1">
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden border border-gray-200/50 hover:shadow-2xl transition-shadow duration-300">
               <div 
                 className="w-full relative" 
@@ -610,7 +610,7 @@ function TrackingPageContent() {
           </div>
 
           {/* بيانات المركبة */}
-          <div className="space-y-6">
+          <div className="space-y-6 order-1 lg:order-2">
             {/* بطاقة معلومات المركبة */}
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-gray-200/50 hover:shadow-2xl transition-all duration-300">
               <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">

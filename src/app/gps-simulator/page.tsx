@@ -315,11 +315,11 @@ export default function GPSSimulator() {
           </div>
 
           {/* أزرار التحكم */}
-          <div className="flex gap-3 mb-6">
+          <div className="flex flex-col sm:flex-row gap-3 mb-6">
             <button
               onClick={() => setIsRunning(!isRunning)}
               disabled={!selectedVehicle}
-              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition ${
+              className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-medium transition flex-1 sm:flex-none ${
                 isRunning
                   ? 'bg-yellow-600 hover:bg-yellow-700 text-white'
                   : 'bg-green-600 hover:bg-green-700 text-white'
@@ -328,12 +328,12 @@ export default function GPSSimulator() {
               {isRunning ? (
                 <>
                   <Pause className="w-5 h-5" />
-                  إيقاف
+                  <span>إيقاف</span>
                 </>
               ) : (
                 <>
                   <Play className="w-5 h-5" />
-                  تشغيل
+                  <span>تشغيل</span>
                 </>
               )}
             </button>
@@ -341,24 +341,24 @@ export default function GPSSimulator() {
             <button
               onClick={handleManualSend}
               disabled={!selectedVehicle || isRunning}
-              className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="flex items-center justify-center gap-2 px-4 sm:px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition disabled:bg-gray-400 disabled:cursor-not-allowed flex-1 sm:flex-none"
             >
               <Send className="w-5 h-5" />
-              إرسال يدوي
+              <span className="whitespace-nowrap">إرسال يدوي</span>
             </button>
 
             <button
               onClick={resetLocation}
-              className="flex items-center gap-2 px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition"
+              className="flex items-center justify-center gap-2 px-4 sm:px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition flex-1 sm:flex-none"
             >
               <Square className="w-5 h-5" />
-              إعادة تعيين
+              <span>إعادة تعيين</span>
             </button>
           </div>
 
           {/* حالة الإرسال */}
           {status !== 'idle' && (
-            <div className={`p-4 rounded-lg mb-4 ${
+            <div className={`p-3 sm:p-4 rounded-lg mb-4 text-sm sm:text-base ${
               status === 'success' ? 'bg-green-50 border border-green-200 text-green-800' :
               status === 'error' ? 'bg-red-50 border border-red-200 text-red-800' :
               'bg-blue-50 border border-blue-200 text-blue-800'

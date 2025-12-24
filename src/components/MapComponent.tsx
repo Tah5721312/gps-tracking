@@ -153,19 +153,26 @@ export default function MapComponent({ vehicles, selectedVehicle, onVehicleClick
   // دالة مساعدة لإنشاء محتوى Popup
   const createPopupContent = (vehicle: Vehicle) => {
     return `
+      <style>
+        @media (max-width: 639px) {
+          .popup-battery, .popup-last-update {
+            display: none !important;
+          }
+        }
+      </style>
       <div style="font-family: Arial; direction: rtl; padding: 8px; min-width: 200px;">
         <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold;">${vehicle.name}</h3>
         <p style="margin: 4px 0; font-size: 13px;"><strong>لوحة:</strong> ${vehicle.plate}</p>
         <p style="margin: 4px 0; font-size: 13px;"><strong>السائق:</strong> ${vehicle.driver}</p>
         ${vehicle.driverPhone ? `<p style="margin: 4px 0; font-size: 13px;"><strong>رقم التليفون:</strong> ${vehicle.driverPhone}</p>` : ''}
         <p style="margin: 4px 0; font-size: 13px;"><strong>السرعة:</strong> ${Math.round(vehicle.speed)} كم/س</p>
-        <p style="margin: 4px 0; font-size: 13px;"><strong>البطارية:</strong> ${Math.round(vehicle.battery)}%</p>
+        <p class="popup-battery" style="margin: 4px 0; font-size: 13px;"><strong>البطارية:</strong> ${Math.round(vehicle.battery)}%</p>
         <p style="margin: 4px 0; font-size: 13px;"><strong>الحالة:</strong> ${
           vehicle.status === 'moving' ? 'متحركة' : 
           vehicle.status === 'stopped' ? 'متوقفة' : 
           'مطفأة'
         }</p>
-        <p style="margin: 4px 0; font-size: 11px; color: #666;"><strong>آخر تحديث:</strong> ${vehicle.lastUpdate.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}</p>
+        <p class="popup-last-update" style="margin: 4px 0; font-size: 11px; color: #666;"><strong>آخر تحديث:</strong> ${vehicle.lastUpdate.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}</p>
         <button id="track-btn-${vehicle.id}" style="
           width: 100%;
           margin-top: 8px;

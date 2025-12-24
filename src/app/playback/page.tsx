@@ -400,8 +400,8 @@ function PlaybackPageContent() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6">
           <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-gray-200/50 hover:shadow-2xl transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
@@ -563,79 +563,81 @@ function PlaybackPageContent() {
           
         </div>
 
-        <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden border border-gray-200/50 hover:shadow-2xl transition-shadow duration-300">
-          <div
-            ref={mapContainerRef}
-            className="w-full"
-            style={{
-              height: '620px',
-              minHeight: '620px',
-              width: '100%',
-              position: 'relative',
-              zIndex: 0,
-              backgroundColor: '#f3f4f6'
-            }}
-          >
-            {isPlaying && (
-              <div className="absolute top-4 left-4 z-1000 bg-white/95 backdrop-blur-md px-4 py-2 rounded-xl shadow-lg border border-gray-200/50 flex items-center gap-2">
-                <div className="relative">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
-                  <div className="absolute inset-0 w-3 h-3 bg-blue-500 rounded-full animate-ping"></div>
-                </div>
-                <span className="text-sm font-semibold text-gray-700">تشغيل</span>
-              </div>
+        <div className="flex flex-col gap-6">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-gray-200/50 hover:shadow-2xl transition-all duration-300 order-1">
+            <div className="flex items-center gap-2 mb-4">
+              <Play className="w-5 h-5 text-green-500" />
+              <h2 className="text-lg font-bold text-gray-900">التشغيل</h2>
+            </div>
+
+            <div className="flex items-center justify-between mb-3 text-sm text-gray-600">
+              <span>النقاط: {trackingPoints.length}</span>
+              <span>التقدم: {progressPercent}%</span>
+            </div>
+            <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden mb-4">
+              <div
+                className="h-full bg-linear-to-r from-blue-500 to-blue-600 transition-all duration-300"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={startPlayback}
+                disabled={!trackingPoints.length || isLoading}
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-60"
+              >
+                <Play className="w-5 h-5" />
+                تشغيل
+              </button>
+              <button
+                onClick={() => {
+                  stopPlayback();
+                  setCurrentIndex(0);
+                  setShowFinishedModal(false);
+                  if (trackingPoints.length && mapRef.current && leafletRef.current) {
+                    const first = [trackingPoints[0].latitude, trackingPoints[0].longitude] as [number, number];
+                    markerRef.current?.setLatLng(first);
+                    playbackPolylineRef.current?.setLatLngs([first]);
+                  }
+                }}
+                disabled={isLoading}
+                className="px-4 py-3 inline-flex items-center justify-center gap-2 bg-gray-100 text-gray-800 rounded-xl font-semibold border border-gray-200 hover:bg-gray-200 transition-all disabled:opacity-60"
+              >
+                <RotateCw className="w-5 h-5" />
+                إعادة تعيين
+              </button>
+            </div>
+
+            {trackingPoints.length === 0 && !isLoading && (
+              <p className="mt-4 text-sm text-gray-500">حمّل المسار لليوم والوقت المحددين ثم اضغط تشغيل.</p>
             )}
           </div>
-        </div>
 
-        <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-gray-200/50 hover:shadow-2xl transition-all duration-300">
-          <div className="flex items-center gap-2 mb-4">
-            <Play className="w-5 h-5 text-green-500" />
-            <h2 className="text-lg font-bold text-gray-900">التشغيل</h2>
-          </div>
-
-          <div className="flex items-center justify-between mb-3 text-sm text-gray-600">
-            <span>النقاط: {trackingPoints.length}</span>
-            <span>التقدم: {progressPercent}%</span>
-          </div>
-          <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden mb-4">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden border border-gray-200/50 hover:shadow-2xl transition-shadow duration-300 order-2">
             <div
-              className="h-full bg-linear-to-r from-blue-500 to-blue-600 transition-all duration-300"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-
-          <div className="flex gap-3">
-            <button
-              onClick={startPlayback}
-              disabled={!trackingPoints.length || isLoading}
-              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-60"
-            >
-              <Play className="w-5 h-5" />
-              تشغيل
-            </button>
-            <button
-              onClick={() => {
-                stopPlayback();
-                setCurrentIndex(0);
-                setShowFinishedModal(false);
-                if (trackingPoints.length && mapRef.current && leafletRef.current) {
-                  const first = [trackingPoints[0].latitude, trackingPoints[0].longitude] as [number, number];
-                  markerRef.current?.setLatLng(first);
-                  playbackPolylineRef.current?.setLatLngs([first]);
-                }
+              ref={mapContainerRef}
+              className="w-full"
+              style={{
+                height: '620px',
+                minHeight: '620px',
+                width: '100%',
+                position: 'relative',
+                zIndex: 0,
+                backgroundColor: '#f3f4f6'
               }}
-              disabled={isLoading}
-              className="px-4 py-3 inline-flex items-center justify-center gap-2 bg-gray-100 text-gray-800 rounded-xl font-semibold border border-gray-200 hover:bg-gray-200 transition-all disabled:opacity-60"
             >
-              <RotateCw className="w-5 h-5" />
-              إعادة تعيين
-            </button>
+              {isPlaying && (
+                <div className="absolute top-4 left-4 z-1000 bg-white/95 backdrop-blur-md px-4 py-2 rounded-xl shadow-lg border border-gray-200/50 flex items-center gap-2">
+                  <div className="relative">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                    <div className="absolute inset-0 w-3 h-3 bg-blue-500 rounded-full animate-ping"></div>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-700">تشغيل</span>
+                </div>
+              )}
+            </div>
           </div>
-
-          {trackingPoints.length === 0 && !isLoading && (
-            <p className="mt-4 text-sm text-gray-500">حمّل المسار لليوم والوقت المحددين ثم اضغط تشغيل.</p>
-          )}
         </div>
       </div>
 
