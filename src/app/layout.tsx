@@ -19,13 +19,17 @@ export const metadata: Metadata = {
   // Favicon and manifest configuration
   icons: {
     icon: [
-      { url: '/favicon/icon512_rounded.png', sizes: '512x512', type: 'image/png' },
-      { url: '/favicon/icon512_rounded.png', sizes: '32x32', type: 'image/png' },
-      { url: '/favicon/icon512_rounded.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon/favicon.ico', sizes: 'any' },
+      { url: '/favicon/icon0.svg', type: 'image/svg+xml' },
+      { url: '/favicon/icon1.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon/icon1.png', sizes: '192x192', type: 'image/png' },
+      { url: '/favicon/icon1.png', sizes: '512x512', type: 'image/png' },
     ],
-    shortcut: '/favicon/icon512_rounded.png',
+    shortcut: [
+      { url: '/favicon/icon1.png', sizes: '192x192', type: 'image/png' },
+    ],
     apple: [
-      { url: '/favicon/icon512_rounded.png', sizes: '512x512', type: 'image/png' },
+      { url: '/favicon/apple-icon.png', sizes: '180x180', type: 'image/png' },
     ],
   },
   manifest: `/favicon/manifest.json`,
