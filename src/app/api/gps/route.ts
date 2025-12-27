@@ -93,38 +93,6 @@ async function processGPSData(data: any) {
     data: updateData
   });
 
-  // التحقق من الرحلات الجارية والتحقق من الوصول للوجهة
-  const activeTrips = await prisma.trip.findMany({
-    where: {
-      vehicleId: vehicle.id,
-      endTime: null // رحلات جارية فقط
-    }
-  }) as any[]; // Temporary until Prisma Client is regenerated
-
-  // حساب المسافة للوجهة لكل رحلة جارية
-  for (const trip of activeTrips) {
-    if (trip.destinationLat && trip.destinationLng && 
-        (trip.arrivalStatus === 'in_progress' || trip.arrivalStatus === 'not_set' || !trip.arrivalStatus)) {
-      const distanceToDestination = calculateDistance(
-        parseFloat(latitude),
-        parseFloat(longitude),
-        trip.destinationLat,
-        trip.destinationLng
-      );
-
-      // إذا كانت المسافة أقل من 100 متر، نعتبر أن المركبة وصلت
-      if (distanceToDestination < 0.1 && trip.arrivalStatus !== 'arrived') {
-        await prisma.trip.update({
-          where: { id: trip.id },
-          data: {
-            arrivalStatus: 'arrived',
-            arrivalTime: currentTime
-          } as any
-        });
-      }
-    }
-  }
-
   return {
     success: true,
     trackingPoint,

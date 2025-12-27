@@ -15,6 +15,7 @@ interface Vehicle {
   driverPhone?: string;
   speed: number;
   lastUpdate: Date;
+  driverId?: number | null;
 }
 
 interface VehiclesTabProps {
@@ -120,8 +121,7 @@ export default function VehiclesTab({
           name: vehicle.name,
           plateNumber: vehicle.plate,
           deviceImei: vehicle.deviceImei,
-          driverName: vehicle.driver,
-          driverPhone: vehicle.driverPhone || null,
+          driverId: (vehicle as any).driverId || null,
           status: vehicle.status
         })
       });
@@ -291,15 +291,15 @@ export default function VehiclesTab({
         <table className="w-full text-sm">
           <thead className="bg-gray-100 border-b-2">
             <tr>
-              <th className="px-4 py-3 text-right font-bold text-gray-700">اسم المركبة</th>
-              <th className="px-4 py-3 text-right font-bold text-gray-700">رقم اللوحة</th>
-              <th className="px-4 py-3 text-right font-bold text-gray-700">IMEI</th>
-              <th className="px-4 py-3 text-right font-bold text-gray-700">السائق</th>
-              <th className="px-4 py-3 text-right font-bold text-gray-700">هاتف السائق</th>
-              <th className="px-4 py-3 text-right font-bold text-gray-700">الحالة</th>
-              <th className="px-4 py-3 text-right font-bold text-gray-700">السرعة</th>
-              <th className="px-4 py-3 text-right font-bold text-gray-700">آخر تحديث</th>
-              <th className="px-4 py-3 text-right font-bold text-gray-700">الإجراءات</th>
+              <th className="px-4 py-3 text-center font-bold text-gray-700">اسم المركبة</th>
+              <th className="px-4 py-3 text-center font-bold text-gray-700">رقم اللوحة</th>
+              <th className="px-4 py-3 text-center font-bold text-gray-700">IMEI</th>
+              <th className="px-4 py-3 text-center font-bold text-gray-700">السائق</th>
+              <th className="px-4 py-3 text-center font-bold text-gray-700">هاتف السائق</th>
+              <th className="px-4 py-3 text-center font-bold text-gray-700">الحالة</th>
+              <th className="px-4 py-3 text-center font-bold text-gray-700">أخر سرعة</th>
+              <th className="px-4 py-3 text-center font-bold text-gray-700">آخر تحديث</th>
+              <th className="px-4 py-3 text-center font-bold text-gray-700">الإجراءات</th>
             </tr>
           </thead>
           <tbody className="divide-y">
@@ -312,22 +312,22 @@ export default function VehiclesTab({
             ) : (
               vehicles.map(vehicle => (
                 <tr key={vehicle.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-gray-900 font-medium">{vehicle.name}</td>
-                  <td className="px-4 py-3 text-gray-600">{vehicle.plate}</td>
-                  <td className="px-4 py-3 text-gray-600 text-xs">{vehicle.deviceImei}</td>
-                  <td className="px-4 py-3 text-gray-600">{vehicle.driver}</td>
-                  <td className="px-4 py-3 text-gray-600">{vehicle.driverPhone || '-'}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 text-center text-gray-900 font-medium">{vehicle.name}</td>
+                  <td className="px-4 py-3 text-center text-gray-600">{vehicle.plate}</td>
+                  <td className="px-4 py-3 text-center text-gray-600 text-xs">{vehicle.deviceImei}</td>
+                  <td className="px-4 py-3 text-center text-gray-600">{vehicle.driver}</td>
+                  <td className="px-4 py-3 text-center text-gray-600">{vehicle.driverPhone || '-'}</td>
+                  <td className="px-4 py-3 text-center">
                     <span className={`px-2 py-1 rounded-full text-xs text-white ${getStatusColor(vehicle.status)}`}>
                       {getStatusText(vehicle.status)}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{Math.round(vehicle.speed)} كم/س</td>
-                  <td className="px-4 py-3 text-gray-600 text-xs">
+                  <td className="px-4 py-3 text-center text-gray-600">{Math.round(vehicle.speed)} كم/س</td>
+                  <td className="px-4 py-3 text-center text-gray-600 text-xs">
                     {vehicle.lastUpdate.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2 justify-end">
+                  <td className="px-4 py-3 text-center">
+                    <div className="flex gap-2 justify-center">
                       <button
                         onClick={() => {
                           setEditingVehicle(vehicle);

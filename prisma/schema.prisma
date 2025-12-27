@@ -7,62 +7,175 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ═══════════════════════════════════════════════════════════
+// 🎭 ENUMS
+// ═══════════════════════════════════════════════════════════
+
 enum VehicleStatus {
-  moving
-  stopped
-  turnoff
+  moving // تتحرك
+  stopped // متوقفة (المحرك شغال)
+  turnoff // مطفية (المحرك مطفي)
 }
+
+// ═══════════════════════════════════════════════════════════
+// 🚚 MODEL: Vehicle - المركبات
+// ═══════════════════════════════════════════════════════════
 
 model Vehicle {
-  id              Int             @id @default(autoincrement())
-  name            String
-  plateNumber     String          @unique
-  deviceImei      String          @unique
-  driverName      String?
-  driverPhone     String?
-  status          VehicleStatus   @default(turnoff)
-  lastLatitude    Float?
-  lastLongitude   Float?
-  lastSpeed       Float?
-  lastUpdate      DateTime?
-  stoppedAt       DateTime?       // وقت بدء الوقوف
-  totalStoppedTime Int            @default(0) // إجمالي وقت الوقوف بالثواني
-  createdAt       DateTime        @default(now())
-  trackingPoints  TrackingPoint[]
-  trips           Trip[]
+  id          Int    @id @default(autoincrement())
+  name        String // اسم المركبة (مثل: سيارة 1)
+  plateNumber String @unique // رقم اللوحة
+  deviceImei  String @unique // IMEI جهاز GPS
+
+  // ربط السائق
+  driverId Int? // معرف السائق
+  driver   Driver? @relation(fields: [driverId], references: [id], onDelete: SetNull)
+
+  // الحالة الحالية
+  status VehicleStatus @default(turnoff)
+
+  // آخر موقع معروف
+  lastLatitude  Float?
+  lastLongitude Float?
+  lastSpeed     Float? // كم/س
+  lastUpdate    DateTime? // آخر تحديث من GPS
+
+  // معلومات التوقف
+  stoppedAt        DateTime? // وقت بدء التوقف الحالي
+  totalStoppedTime Int       @default(0) // إجمالي وقت الوقوف اليوم (بالثواني)
+
+  // إحصائيات يومية (يتم إعادة تعيينها كل يوم)
+  dailyDistance  Float     @default(0) // المسافة اليومية (كم)
+  dailyMaxSpeed  Float     @default(0) // أقصى سرعة اليوم (كم/س)
+  dailyStartTime DateTime? // وقت بدء العمل اليوم
+  dailyStops     Int       @default(0) // عدد التوقفات اليوم
+  lastResetDate  DateTime? @default(now()) // آخر reset للإحصائيات
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  // العلاقات
+  trackingPoints TrackingPoint[]
+  dailyReports   DailyReport[]
+
+  @@index([status])
+  @@index([lastUpdate])
+  @@index([driverId])
 }
+
+// ═══════════════════════════════════════════════════════════
+// 👤 MODEL: Driver - السائقين
+// ═══════════════════════════════════════════════════════════
+
+model Driver {
+  id         Int       @id @default(autoincrement())
+  name       String // الاسم (مطلوب)
+  phone      String    @unique // رقم التليفون (مطلوب)
+  address    String // العنوان (مطلوب)
+  nationalId String?   @unique // الرقم القومي
+  province   String? // المحافظة
+  birthDate  DateTime? @db.Date // تاريخ الميلاد
+  notes      String?   @db.Text // ملاحظات
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // العلاقات
+  vehicles Vehicle[] // المركبات المرتبطة بهذا السائق
+
+  @@index([name])
+  @@index([phone])
+}
+
+// ═══════════════════════════════════════════════════════════
+// 📍 MODEL: TrackingPoint - نقاط التتبع
+// ═══════════════════════════════════════════════════════════
 
 model TrackingPoint {
-  id           Int      @id @default(autoincrement())
-  vehicleId    Int
-  latitude     Float
-  longitude    Float
-  speed        Float
-  batteryLevel Int
-  timestamp    DateTime
-  vehicle      Vehicle  @relation(fields: [vehicleId], references: [id])
-  
-  @@index([vehicleId, timestamp])
+  id        Int     @id @default(autoincrement())
+  vehicleId Int
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  // بيانات الموقع
+  latitude  Float
+  longitude Float
+  speed     Float // كم/س
+  heading   Float? // الاتجاه (0-360)
+
+  // بيانات إضافية من GPS
+  batteryLevel Int? // مستوى البطارية
+  gpsAccuracy  Float? // دقة GPS (بالأمتار)
+  altitude     Float? // الارتفاع
+
+  timestamp DateTime // وقت التسجيل من GPS
+  createdAt DateTime @default(now()) // وقت الإدخال في قاعدة البيانات
+
+  @@index([vehicleId, timestamp(sort: Desc)])
+  @@index([timestamp(sort: Desc)])
 }
 
-model Trip {
-  id              Int       @id @default(autoincrement())
-  vehicleId       Int
-  startTime       DateTime
-  endTime         DateTime?
-  distance        Float     @default(0)      // المسافة بالكيلومتر
-  avgSpeed        Float     @default(0)      // متوسط السرعة (كم/س)
-  maxSpeed        Float     @default(0)      // أقصى سرعة (كم/س)
-  stops           Int       @default(0)      // عدد التوقفات
-  notes           String?                   // ملاحظات إضافية (اختياري)
-  destinationLat Float?                     // خط عرض الوجهة
-  destinationLng Float?                     // خط طول الوجهة
-  destinationName String?                   // اسم الوجهة (اختياري)
-  arrivalStatus   String    @default("in_progress") // حالة الوصول: in_progress, arrived, not_set
-  arrivalTime     DateTime?                 // وقت الوصول الفعلي
-  createdAt       DateTime  @default(now())  // وقت إنشاء السجل
-  updatedAt       DateTime  @default(now()) @updatedAt  // وقت آخر تحديث
-  vehicle         Vehicle   @relation(fields: [vehicleId], references: [id])
-  
-  @@index([vehicleId, startTime])
+// ═══════════════════════════════════════════════════════════
+// 📊 MODEL: DailyReport - التقارير اليومية
+// ═══════════════════════════════════════════════════════════
+
+model DailyReport {
+  id        Int     @id @default(autoincrement())
+  vehicleId Int
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  date DateTime @db.Date // التاريخ (بدون وقت)
+
+  // إحصائيات الرحلة
+  totalDistance    Float @default(0) // المسافة الكلية (كم)
+  totalDuration    Int   @default(0) // مدة العمل (بالدقائق)
+  totalStoppedTime Int   @default(0) // وقت التوقف الكلي (بالدقائق)
+  totalMovingTime  Int   @default(0) // وقت الحركة (بالدقائق)
+
+  // السرعات
+  maxSpeed Float @default(0) // أقصى سرعة (كم/س)
+  avgSpeed Float @default(0) // متوسط السرعة (كم/س)
+
+  // التوقفات
+  numberOfStops Int @default(0) // عدد التوقفات
+  longestStop   Int @default(0) // أطول توقف (بالدقائق)
+
+  // الأوقات
+  firstMovement DateTime? // أول حركة في اليوم
+  lastMovement  DateTime? // آخر حركة في اليوم
+
+  // نقاط البداية والنهاية
+  startLat Float?
+  startLng Float?
+  endLat   Float?
+  endLng   Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([vehicleId, date])
+  @@index([date(sort: Desc)])
+  @@index([vehicleId, date(sort: Desc)])
+  @@index([vehicleId])
+  @@index([firstMovement])
+  @@index([lastMovement])
+  @@index([date, firstMovement, lastMovement])
+}
+
+// ═══════════════════════════════════════════════════════════
+// 🚨 MODEL: Alert - التنبيهات (اختياري)
+// ═══════════════════════════════════════════════════════════
+
+model Alert {
+  id        Int      @id @default(autoincrement())
+  vehicleId Int
+  type      String // speeding, stopped_too_long, engine_off, geofence
+  severity  String // low, medium, high
+  message   String
+  latitude  Float?
+  longitude Float?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([vehicleId, isRead])
+  @@index([createdAt(sort: Desc)])
 }

@@ -124,38 +124,6 @@ function TrackingPageContent() {
     return '';
   };
 
-  // جلب الرحلة النشطة
-  const fetchActiveTrip = async () => {
-    if (!vehicleId) return;
-
-    try {
-      const response = await apiFetch(`/api/trips?vehicleId=${vehicleId}`);
-      if (response.ok) {
-        const data = await response.json();
-        // البحث عن رحلة نشطة (بدون endTime)
-        const activeTrip = data.trips.find((t: any) => !t.endTime && t.destinationLat && t.destinationLng);
-        if (activeTrip) {
-          setTrip({
-            id: activeTrip.id,
-            destinationLat: activeTrip.destinationLat,
-            destinationLng: activeTrip.destinationLng,
-            destinationName: activeTrip.destinationName,
-            arrivalStatus: activeTrip.arrivalStatus,
-          });
-          
-          // جلب اسم الوجهة بالعربية
-          if (activeTrip.destinationLat && activeTrip.destinationLng) {
-            await fetchDestinationNameAr(activeTrip.destinationLat, activeTrip.destinationLng);
-          }
-        } else {
-          setTrip(null);
-          setDestinationNameAr('');
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching trip:', error);
-    }
-  };
 
   // تهيئة الخريطة
   useEffect(() => {
@@ -487,7 +455,6 @@ function TrackingPageContent() {
   useEffect(() => {
     if (vehicleId) {
       fetchVehicle();
-      fetchActiveTrip();
       setLoading(false);
     } else {
       router.push('/dashboard');
@@ -500,7 +467,6 @@ function TrackingPageContent() {
 
     const interval = setInterval(() => {
       fetchVehicle();
-      fetchActiveTrip();
     }, 5000);
 
     return () => clearInterval(interval);

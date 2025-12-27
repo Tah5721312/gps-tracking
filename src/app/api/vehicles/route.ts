@@ -39,6 +39,15 @@ export async function GET(request: NextRequest) {
   try {
     // محاولة جلب البيانات بدون trackingPoints أولاً للتأكد من الاتصال
     const vehicles = await prisma.vehicle.findMany({
+      include: {
+        driver: {
+          select: {
+            id: true,
+            name: true,
+            phone: true
+          }
+        }
+      } as any,
       orderBy: {
         id: 'asc'
       }
@@ -89,10 +98,18 @@ export async function POST(request: NextRequest) {
         name: data.name,
         plateNumber: data.plateNumber,
         deviceImei: data.deviceImei,
-        driverName: data.driverName || null,
-        driverPhone: data.driverPhone || null,
-        status: 'turnoff' as any // Temporary until Prisma Client is regenerated
-      } as any, // Temporary until Prisma Client is regenerated
+        driverId: data.driverId || null,
+        status: 'turnoff' as any
+      } as any,
+      include: {
+        driver: {
+          select: {
+            id: true,
+            name: true,
+            phone: true
+          }
+        }
+      } as any
     });
 
     return NextResponse.json({ vehicle });

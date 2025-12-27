@@ -149,7 +149,7 @@ export default function MapTab({
                   <span className="font-medium text-xs text-right break-all">{vehicle.deviceImei}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">السرعة:</span>
+                  <span className="text-gray-600">أخر سرعة:</span>
                   <span className="font-medium">{Math.round(vehicle.speed)} كم/س</span>
                 </div>
                 <div className="hidden sm:flex justify-between items-center">

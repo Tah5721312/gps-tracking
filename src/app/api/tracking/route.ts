@@ -31,10 +31,16 @@ export async function GET(request: NextRequest) {
             id: true,
             name: true,
             plateNumber: true,
-            driverName: true
+            driver: {
+              select: {
+                id: true,
+                name: true,
+                phone: true
+              }
+            }
           }
         }
-      },
+      } as any,
       orderBy: {
         timestamp: 'desc'
       },

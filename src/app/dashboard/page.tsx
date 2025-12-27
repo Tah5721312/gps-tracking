@@ -3,9 +3,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MapPin, Truck, Activity, Clock, Navigation, AlertCircle, Download, Bell, Maximize2, Settings, Calendar } from 'lucide-react';
 import MapTab from '@/components/dashboard/MapTab';
-import ReportsTab from '@/components/dashboard/ReportsTab';
+import DailyReportsTab from '@/components/dashboard/DailyReportsTab';
 import VehiclesTab from '@/components/dashboard/VehiclesTab';
-import TripsTab from '@/components/dashboard/TripsTab';
+import DriversTab from '@/components/dashboard/DriversTab';
 import { apiFetch } from '@/lib/api';
 
 interface Vehicle {
@@ -19,6 +19,7 @@ interface Vehicle {
   status: 'moving' | 'stopped' | 'turnoff';
   driverPhone?: string;
   driver: string;
+  driverId?: number | null;
   lastUpdate: Date;
   battery: number;
   createdAt: Date;
@@ -27,16 +28,6 @@ interface Vehicle {
   currentStoppedTime?: number; // وقت الوقوف الحالي بالثواني
 }
 
-interface Trip {
-  id: number;
-  vehicleId: number;
-  startTime: string;
-  endTime: string;
-  distance: number;
-  duration: string;
-  stops: number;
-  avgSpeed: number;
-}
 
 interface Alert {
   id: number;
@@ -50,16 +41,12 @@ interface Alert {
 
 export default function GPSTrackingDashboard() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [trips, setTrips] = useState<Trip[]>([]);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [activeTab, setActiveTab] = useState('map');
   const [filter, setFilter] = useState('all');
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [showAlerts, setShowAlerts] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [tripStats, setTripStats] = useState({ totalDistance: 0, totalTrips: 0, avgSpeed: 0, totalStops: 0 });
-  const [selectedVehicleFilter, setSelectedVehicleFilter] = useState<string>('all');
-  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
   // دالة مساعدة لتنسيق بيانات المركبة
   const formatVehicleData = (v: any): Vehicle => {
@@ -83,8 +70,9 @@ export default function GPSTrackingDashboard() {
       lng: v.lastLongitude || 31.2357,
       speed: v.lastSpeed || 0,
       status: (v.status || 'turnoff') as 'moving' | 'stopped' | 'turnoff',
-      driver: v.driverName || 'غير محدد',
-      driverPhone: v.driverPhone || undefined,
+      driver: v.driver?.name || 'غير محدد',
+      driverPhone: v.driver?.phone || undefined,
+      driverId: v.driverId || null,
       lastUpdate: lastUpdate,
       battery: v.latestTrackingPoint?.batteryLevel || 100,
       createdAt: v.createdAt ? new Date(v.createdAt) : now,
@@ -168,64 +156,6 @@ export default function GPSTrackingDashboard() {
     fetchVehicles();
   }, []);
 
-  // دالة مساعدة لجلب رحلات اليوم
-  const fetchTodayTrips = async (date?: string) => {
-    try {
-      const targetDate = date ? new Date(date) : new Date();
-      const startDate = new Date(targetDate.setHours(0, 0, 0, 0)).toISOString();
-      const endDate = new Date(targetDate.setHours(23, 59, 59, 999)).toISOString();
-      
-      const vehicleIdParam = selectedVehicleFilter !== 'all' ? `&vehicleId=${selectedVehicleFilter}` : '';
-      const response = await apiFetch(`/api/reports/trips?startDate=${startDate}&endDate=${endDate}${vehicleIdParam}`);
-      if (response.ok) {
-        const data = await response.json();
-        
-        // حفظ الإحصائيات
-        if (data.stats) {
-          setTripStats(data.stats);
-        }
-        
-        const formattedTrips: Trip[] = data.trips.map((trip: any) => {
-          const start = new Date(trip.startTime);
-          const end = trip.endTime ? new Date(trip.endTime) : new Date();
-          const durationMs = end.getTime() - start.getTime();
-          const hours = Math.floor(durationMs / (1000 * 60 * 60));
-          const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-          
-          return {
-            id: trip.id,
-            vehicleId: trip.vehicleId,
-            startTime: start.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
-            endTime: trip.endTime ? end.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : 'قيد التنفيذ',
-            distance: trip.distance,
-            duration: `${hours}س ${minutes}د`,
-            stops: trip.stops,
-            avgSpeed: Math.round(trip.avgSpeed)
-          };
-        });
-        setTrips(formattedTrips);
-      }
-    } catch (error) {
-      console.error('Error fetching trips:', error);
-    }
-  };
-
-  // جلب رحلات اليوم عند التحميل الأولي
-  useEffect(() => {
-    fetchTodayTrips(selectedDate);
-  }, []);
-
-  // جلب الرحلات عند فتح تبويب التقارير أو تغيير الفلاتر
-  useEffect(() => {
-    if (activeTab === 'reports') {
-      fetchTodayTrips(selectedDate);
-      // تحديث الرحلات كل 10 ثواني عند فتح تبويب التقارير
-      const interval = setInterval(() => {
-        fetchTodayTrips(selectedDate);
-      }, 10000);
-      return () => clearInterval(interval);
-    }
-  }, [activeTab, selectedDate, selectedVehicleFilter]);
 
   // تحديث المركبات من API كل 5 ثواني
   useEffect(() => {
@@ -249,22 +179,6 @@ export default function GPSTrackingDashboard() {
     setSelectedVehicle(vehicle);
   };
 
-  // دالة لتصدير التقرير
-  const exportReport = () => {
-    const csvContent = trips.map(trip => {
-      const vehicle = vehicles.find(v => v.id === trip.vehicleId);
-      return `${vehicle?.name || 'غير معروف'},${trip.startTime},${trip.endTime},${trip.distance},${trip.duration},${trip.stops},${trip.avgSpeed}`;
-    }).join('\n');
-    
-    const blob = new Blob(['\ufeff' + 'المركبة,وقت البداية,وقت النهاية,المسافة (كم),المدة,التوقفات,متوسط السرعة (كم/س)\n' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `تقرير_الرحلات_${new Date().toLocaleDateString('ar-EG')}.csv`;
-    link.click();
-  };
-
-  // حساب إجمالي المسافة اليومية
-  const todayDistance = trips.reduce((sum, trip) => sum + trip.distance, 0);
 
   return (
     <div className="min-h-screen bg-gray-50" dir="rtl">
@@ -280,10 +194,6 @@ export default function GPSTrackingDashboard() {
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <div className="text-right">
-                  <p className="text-sm text-gray-600">مسافة اليوم</p>
-                  <p className="text-xl font-bold text-blue-600">{todayDistance.toFixed(1)} كم</p>
-                </div>
                 <button
                   onClick={() => setShowAlerts(!showAlerts)}
                   className="relative p-2 text-gray-600 hover:text-gray-900 transition"
@@ -313,19 +223,7 @@ export default function GPSTrackingDashboard() {
                   الخريطة المباشرة
                 </div>
               </button>
-              <button
-                onClick={() => setActiveTab('reports')}
-                className={`py-4 px-6 font-medium transition ${
-                  activeTab === 'reports'
-                    ? 'border-b-2 border-blue-600 text-blue-600'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Clock className="w-5 h-5" />
-                  التقارير والرحلات
-                </div>
-              </button>
+
               <button
                 onClick={() => setActiveTab('vehicles')}
                 className={`py-4 px-6 font-medium transition ${
@@ -339,19 +237,38 @@ export default function GPSTrackingDashboard() {
                   إدارة المركبات
                 </div>
               </button>
+
+
               <button
-                onClick={() => setActiveTab('trips')}
+                onClick={() => setActiveTab('drivers')}
                 className={`py-4 px-6 font-medium transition ${
-                  activeTab === 'trips'
+                  activeTab === 'drivers'
+                    ? 'border-b-2 border-blue-600 text-blue-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Truck className="w-5 h-5" />
+                  إدارة السائقين
+                </div>
+              </button>
+
+              
+              <button
+                onClick={() => setActiveTab('reports')}
+                className={`py-4 px-6 font-medium transition ${
+                  activeTab === 'reports'
                     ? 'border-b-2 border-blue-600 text-blue-600'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
                 <div className="flex items-center gap-2">
                   <Calendar className="w-5 h-5" />
-                  إدارة الرحلات
+                  التقارير اليومية
                 </div>
               </button>
+
+            
             </div>
           </div>
         </header>
@@ -374,23 +291,6 @@ export default function GPSTrackingDashboard() {
             />
           )}
 
-          {/* محتوى التقارير */}
-          {activeTab === 'reports' && (
-            <ReportsTab
-              vehicles={vehicles}
-              trips={trips}
-              tripStats={tripStats}
-              selectedDate={selectedDate}
-              selectedVehicleFilter={selectedVehicleFilter}
-              onDateChange={(date) => {
-                setSelectedDate(date);
-                fetchTodayTrips(date);
-              }}
-              onVehicleFilterChange={setSelectedVehicleFilter}
-              onExportReport={exportReport}
-            />
-          )}
-
           {/* محتوى إدارة المركبات */}
           {activeTab === 'vehicles' && (
             <VehiclesTab
@@ -409,21 +309,27 @@ export default function GPSTrackingDashboard() {
             />
           )}
 
-          {/* محتوى إدارة الرحلات */}
-          {activeTab === 'trips' && (
-            <TripsTab
+
+          {/* محتوى إدارة السائقين */}
+          {activeTab === 'drivers' && (
+            <DriversTab />
+          )}
+
+
+          {/* محتوى التقارير اليومية */}
+          {activeTab === 'reports' && (
+            <DailyReportsTab
               vehicles={vehicles.map(v => ({
                 id: v.id,
                 name: v.name,
                 plate: v.plate,
+                deviceImei: v.deviceImei,
                 driver: v.driver
               }))}
-              onTripUpdate={() => {
-                // تحديث التقارير عند إضافة/تعديل/حذف رحلة
-                fetchTodayTrips(selectedDate);
-              }}
             />
           )}
+
+          
         </div>
       </div>
     </div>

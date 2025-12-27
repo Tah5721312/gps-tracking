@@ -44,7 +44,16 @@ export async function GET(
   try {
     const { id } = await params;
     const vehicle = await prisma.vehicle.findUnique({
-      where: { id: parseInt(id) }
+      where: { id: parseInt(id) },
+      include: {
+        driver: {
+          select: {
+            id: true,
+            name: true,
+            phone: true
+          }
+        }
+      } as any
     });
 
     if (!vehicle) {
@@ -93,10 +102,18 @@ export async function PUT(
         name: data.name,
         plateNumber: data.plateNumber,
         deviceImei: data.deviceImei,
-        driverName: data.driverName || null,
-        driverPhone: data.driverPhone || null,
+        driverId: data.driverId || null,
         status: data.status || 'turnoff'
-      } as any // Temporary until Prisma Client is regenerated
+      } as any,
+      include: {
+        driver: {
+          select: {
+            id: true,
+            name: true,
+            phone: true
+          }
+        }
+      } as any
     });
 
     return NextResponse.json({ vehicle });
@@ -123,8 +140,8 @@ export async function DELETE(
       where: { vehicleId: vehicleId }
     });
 
-    // حذف جميع الرحلات المرتبطة
-    await prisma.trip.deleteMany({
+    // حذف جميع التقارير اليومية المرتبطة
+    await prisma.dailyReport.deleteMany({
       where: { vehicleId: vehicleId }
     });
 

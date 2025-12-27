@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { X } from 'lucide-react';
+import { apiFetch } from '@/lib/api';
 
 interface Vehicle {
   id: number;
@@ -13,6 +14,13 @@ interface Vehicle {
   driverPhone?: string;
   speed: number;
   lastUpdate: Date;
+  driverId?: number | null;
+}
+
+interface Driver {
+  id: number;
+  name: string;
+  phone: string;
 }
 
 interface VehiclesModelProps {
@@ -36,10 +44,33 @@ export default function VehiclesModel({
     name: '',
     plate: '',
     deviceImei: '',
-    driver: '',
-    driverPhone: '',
+    driverId: null as number | null,
     status: 'turnoff' as 'moving' | 'stopped' | 'turnoff'
   });
+  const [drivers, setDrivers] = React.useState<Driver[]>([]);
+  const [loadingDrivers, setLoadingDrivers] = React.useState(false);
+
+  // جلب قائمة السائقين
+  React.useEffect(() => {
+    if (isOpen) {
+      fetchDrivers();
+    }
+  }, [isOpen]);
+
+  const fetchDrivers = async () => {
+    try {
+      setLoadingDrivers(true);
+      const response = await apiFetch('/api/drivers');
+      if (response.ok) {
+        const data = await response.json();
+        setDrivers(data);
+      }
+    } catch (error) {
+      console.error('Error fetching drivers:', error);
+    } finally {
+      setLoadingDrivers(false);
+    }
+  };
 
   React.useEffect(() => {
     if (vehicle) {
@@ -47,8 +78,7 @@ export default function VehiclesModel({
         name: vehicle.name,
         plate: vehicle.plate,
         deviceImei: vehicle.deviceImei,
-        driver: vehicle.driver,
-        driverPhone: vehicle.driverPhone || '',
+        driverId: vehicle.driverId || null,
         status: vehicle.status
       });
     }
@@ -59,8 +89,10 @@ export default function VehiclesModel({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({
-      ...vehicle,
-      ...formData
+      ...vehicle!,
+      ...formData,
+      driver: drivers.find(d => d.id === formData.driverId)?.name || '',
+      driverPhone: drivers.find(d => d.id === formData.driverId)?.phone || undefined
     });
   };
 
@@ -120,24 +152,23 @@ export default function VehiclesModel({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">اسم السائق</label>
-              <input
-                type="text"
-                value={formData.driver}
-                onChange={(e) => setFormData({ ...formData, driver: e.target.value })}
+              <label className="block text-sm font-medium text-gray-700 mb-1">السائق</label>
+              <select
+                value={formData.driverId || ''}
+                onChange={(e) => setFormData({ ...formData, driverId: e.target.value ? parseInt(e.target.value) : null })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="مثال: أحمد محمد"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">رقم هاتف السائق</label>
-              <input
-                type="tel"
-                value={formData.driverPhone}
-                onChange={(e) => setFormData({ ...formData, driverPhone: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="مثال: 01234567890"
-              />
+              >
+                <option value="">-- اختر سائق --</option>
+                {loadingDrivers ? (
+                  <option disabled>جاري التحميل...</option>
+                ) : (
+                  drivers.map((driver) => (
+                    <option key={driver.id} value={driver.id}>
+                      {driver.name} - {driver.phone}
+                    </option>
+                  ))
+                )}
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">حالة المركبة</label>
