@@ -27,9 +27,9 @@
 
 <div align="center">
   
-[![فيديو توضيحي للمشروع](https://img.youtube.com/vi/iSXcSxTVB1w/maxresdefault.jpg)](https://youtu.be/iSXcSxTVB1w)
+[![فيديو توضيحي للمشروع](https://img.youtube.com/vi/iSXcSxTVB1w/maxresdefault.jpg)](https://www.youtube.com/watch?v=iSXcSxTVB1w)
 
-**[👉 شاهد الفيديو الكامل على YouTube](https://youtu.be/iSXcSxTVB1w)**
+**[👉 شاهد الفيديو الكامل على YouTube](https://www.youtube.com/watch?v=iSXcSxTVB1w)**
 
 </div>
 
