@@ -9,6 +9,28 @@
   [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)](https://www.typescriptlang.org/)
   [![Prisma](https://img.shields.io/badge/Prisma-6.19-2D3748)](https://www.prisma.io/)
   [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-336791)](https://www.postgresql.org/)
+
+  <br />
+  
+  <a href="https://youtu.be/iSXcSxTVB1w" target="_blank">
+    <img src="https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="Watch on YouTube" />
+  </a>
+  
+  <p>
+    <a href="https://youtu.be/iSXcSxTVB1w" target="_blank">📹 شاهد فيديو توضيحي للمشروع</a>
+  </p>
+</div>
+
+---
+
+## 🎥 فيديو توضيحي
+
+<div align="center">
+  
+[![فيديو توضيحي للمشروع](https://img.youtube.com/vi/iSXcSxTVB1w/maxresdefault.jpg)](https://youtu.be/iSXcSxTVB1w)
+
+**[👉 شاهد الفيديو الكامل على YouTube](https://youtu.be/iSXcSxTVB1w)**
+
 </div>
 
 ---
