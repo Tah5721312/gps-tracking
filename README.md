@@ -1,193 +1,499 @@
-# Next.js + Tailwind CSS + TypeScript Starter and Boilerplate
+# 🚗 نظام تتبع المركبات GPS
 
 <div align="center">
-  <h2>🔋 ts-nextjs-tailwind-starter</h2>
-  <p>Next.js + Tailwind CSS + TypeScript starter packed with useful development features.</p>
-  <p>Made by <a href="https://theodorusclarence.com">Theodorus Clarence</a></p>
+  <h2>نظام متقدم لتتبع وإدارة أسطول المركبات</h2>
+  <p>مراقبة مباشرة للعربيات على الخريطة مع تقارير تفصيلية وإدارة كاملة</p>
+  
+  [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
+  [![React](https://img.shields.io/badge/React-19-blue)](https://react.dev/)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)](https://www.typescriptlang.org/)
+  [![Prisma](https://img.shields.io/badge/Prisma-6.19-2D3748)](https://www.prisma.io/)
+  [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-336791)](https://www.postgresql.org/)
+</div>
 
-[![GitHub Repo stars](https://img.shields.io/github/stars/theodorusclarence/ts-nextjs-tailwind-starter)](https://github.com/theodorusclarence/ts-nextjs-tailwind-starter/stargazers)
-[![Depfu](https://badges.depfu.com/badges/fc6e730632ab9dacaf7df478a08684a7/overview.svg)](https://depfu.com/github/theodorusclarence/ts-nextjs-tailwind-starter?project_id=30160)
-[![Last Update](https://img.shields.io/badge/deps%20update-every%20sunday-blue.svg)](https://shields.io/)
+---
+
+## 📸 لقطات الشاشة
+
+<div align="center">
+  
+### 🗺️ الخريطة المباشرة
+![الخريطة المباشرة](./public/images/map.png)
+
+### 📊 التقارير اليومية
+
+![التقارير اليومية](./public/images/reports.png)
+
+### 🚚 إدارة المركبات
+
+![إدارة المركبات](./public/images/Vehicle.png)
+
+### 🚚 نموذج إضافة/تعديل المركبة
+
+![نموذج المركبة](./public/images/Vehicle_model.png)
+
+### 👤 إدارة السائقين
+
+![إدارة السائقين](./public/images/Driver.png)
+
+### 📍 صفحة التتبع
+
+![صفحة التتبع](./public/images/tracking.png)
+
+### ⏯️ صفحة التشغيل
+
+![صفحة التشغيل](./public/images/playback.png)
+
+### 🎮 محاكي GPS
+
+![محاكي GPS](./public/images/gps_emulator.png)
 
 </div>
 
-## Features
+---
 
-This repository is 🔋 battery packed with:
+## ✨ المميزات
 
-- ⚡️ Next.js 16 with App Router
-- ⚛️ React 19
-- ✨ TypeScript
-- 💨 Tailwind CSS 3 — Configured with CSS Variables to extend the **primary** color
-- 💎 Pre-built Components — Components that will **automatically adapt** with your brand color, [check here for the demo](https://tsnext-tw.thcl.dev/components)
-- 🃏 Jest — Configured for unit testing
-- 📈 Absolute Import and Path Alias — Import components using `@/` prefix
-- 📏 ESLint — Find and fix problems in your code, also will **auto sort** your imports
-- 💖 Prettier — Format your code consistently
-- 🐶 Husky & Lint Staged — Run scripts on your staged files before they are committed
-- 🤖 Conventional Commit Lint — Make sure you & your teammates follow conventional commit
-- ⏰ Release Please — Generate your changelog by activating the `release-please` workflow
-- 👷 Github Actions — Lint your code on PR
-- 🚘 Automatic Branch and Issue Autolink — Branch will be automatically created on issue **assign**, and auto linked on PR
-- 🔥 Snippets — A collection of useful snippets
-- 👀 Open Graph Helper Function — Awesome open graph generated using [og](https://github.com/theodorusclarence/og), fork it and deploy!
-- 🗺 Site Map — Automatically generate sitemap.xml
-- 📦 Expansion Pack — Easily install common libraries, additional components, and configs.
+### 🗺️ **تتبع مباشر**
 
-See the 👉 [feature details and changelog](https://github.com/theodorusclarence/ts-nextjs-tailwind-starter/blob/main/CHANGELOG.md) 👈 for more.
+- عرض المركبات على الخريطة في الوقت الفعلي
+- تحديث تلقائي كل 5 ثواني
+- عرض حالة المركبة (متحركة، متوقفة، مطفأة)
+- عرض السرعة والموقع الحالي
+- فلترة المركبات حسب الحالة
 
-You can also check all of the **details and demos** on my blog post:
+### 📊 **التقارير اليومية**
 
-- [One-stop Starter to Maximize Efficiency on Next.js & Tailwind CSS Projects](https://theodorusclarence.com/blog/one-stop-starter)
+- تقارير تلقائية من نقاط التتبع الفعلية
+- إحصائيات شاملة (المسافة، السرعة، التوقفات)
+- فلترة متقدمة (تاريخ، وقت، مركبة)
+- تصدير إلى Excel
+- Pagination للأداء الأمثل
 
-## Getting Started
+### 🚚 **إدارة المركبات**
 
-### 1. Clone this template using one of the three ways
+- إضافة وتعديل وحذف المركبات
+- ربط المركبات بالسائقين
+- تتبع حالة كل مركبة
+- عرض آخر موقع وسرعة
 
-1. Use this repository as template
+### 👤 **إدارة السائقين**
 
-   **Disclosure:** by using this repository as a template, there will be an attribution on your repository.
+- إدارة كاملة للسائقين (CRUD)
+- معلومات مفصلة (الاسم، التليفون، العنوان، المحافظة، الرقم القومي)
+- ربط السائقين بالمركبات
+- بحث متقدم
 
-   I'll appreciate if you do, so this template can be known by others too 😄
+### 📍 **صفحة التتبع**
 
-   ![Use as template](https://user-images.githubusercontent.com/55318172/129183039-1a61e68d-dd90-4548-9489-7b3ccbb35810.png)
+- عرض مسار المركبة على الخريطة
+- تحديث مباشر للموقع
+- عرض معلومات المركبة والسائق
+- عرض حالة المركبة في الوقت الفعلي
 
-2. Using `create-next-app`
+### ⏯️ **صفحة التشغيل**
 
-   ```bash
-   pnpm create next-app  -e https://github.com/theodorusclarence/ts-nextjs-tailwind-starter ts-pnpm
-   ```
+- تشغيل مسار المركبة عبر الزمن
+- فلترة حسب التاريخ والوقت
+- عرض إحصائيات الرحلة
+- إعادة تشغيل المسار خطوة بخطوة
 
-   If you still want to use **pages directory** (_is not actively maintained_) you can use this command
+### 🎮 **محاكي GPS**
 
-   ```bash
-   npx create-next-app -e https://github.com/theodorusclarence/ts-nextjs-tailwind-starter/tree/pages-directory project-name
-   ```
+- محاكاة حركة المركبات
+- إرسال بيانات GPS وهمية
+- اختبار النظام بدون أجهزة GPS حقيقية
 
-3. Using `degit`
+---
 
-   ```bash
-   npx degit theodorusclarence/ts-nextjs-tailwind-starter YOUR_APP_NAME
-   ```
+## 🛠️ التقنيات المستخدمة
 
-4. Deploy to Vercel
+- **Frontend:**
 
-   [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https%3A%2F%2Fgithub.com%2Ftheodorusclarence%2Fts-nextjs-tailwind-starter)
+  - [Next.js 16](https://nextjs.org/) - React Framework
+  - [React 19](https://react.dev/) - UI Library
+  - [TypeScript](https://www.typescriptlang.org/) - Type Safety
+  - [Tailwind CSS](https://tailwindcss.com/) - Styling
+  - [Leaflet](https://leafletjs.com/) - Interactive Maps
+  - [Lucide React](https://lucide.dev/) - Icons
 
-### 2. Install dependencies
+- **Backend:**
 
-It is encouraged to use **pnpm** so the husky hooks can work properly.
+  - [Next.js API Routes](https://nextjs.org/docs/api-routes/introduction) - API Endpoints
+  - [Prisma](https://www.prisma.io/) - ORM
+  - [PostgreSQL](https://www.postgresql.org/) - Database
+
+- **Tools:**
+  - [XLSX](https://sheetjs.com/) - Excel Export
+  - [Axios](https://axios-http.com/) - HTTP Client
+
+---
+
+## 🚀 البدء السريع
+
+### المتطلبات الأساسية
+
+- [Node.js](https://nodejs.org/) 18+
+- [pnpm](https://pnpm.io/) (مُفضل) أو npm أو yarn
+- [PostgreSQL](https://www.postgresql.org/) Database
+
+### 1. استنساخ المشروع
+
+```bash
+git clone https://github.com/Tah5721312/gps-tracking.git
+cd gps-tracking
+```
+
+### 2. تثبيت المتطلبات
 
 ```bash
 pnpm install
 ```
 
-### 3. Run the development server
+### 3. إعداد قاعدة البيانات
 
-You can start the server using this command:
+أنشئ ملف `.env` في الجذر:
+
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/gps_tracking?schema=public"
+NEXT_PUBLIC_SITE_URL="http://localhost:3000"
+```
+
+### 4. تشغيل Migrations
+
+```bash
+npx prisma migrate dev
+```
+
+### 5. إضافة بيانات تجريبية (اختياري)
+
+```bash
+pnpm db:seed
+```
+
+### 6. تشغيل المشروع
 
 ```bash
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result. You can start editing the page by modifying `src/pages/index.tsx`.
+افتح [http://localhost:3000](http://localhost:3000) في المتصفح.
 
-### 4. Change defaults
+---
 
-There are some things you need to change including title, urls, favicons, etc.
+## 📁 هيكل المشروع
 
-Find all comments with !STARTERCONF, then follow the guide.
+```
+gps-tracking/
+├── prisma/
+│   ├── schema.prisma          # Prisma Schema
+│   └── seed.ts                # بيانات تجريبية
+├── public/
+│   ├── images/                # الصور
+│   └── favicon/               # الأيقونات
+├── src/
+│   ├── app/
+│   │   ├── api/               # API Routes
+│   │   │   ├── drivers/       # API السائقين
+│   │   │   ├── vehicles/      # API المركبات
+│   │   │   ├── reports/        # API التقارير
+│   │   │   ├── gps/            # API استقبال GPS
+│   │   │   └── tracking/       # API نقاط التتبع
+│   │   ├── dashboard/         # لوحة التحكم
+│   │   ├── tracking/           # صفحة التتبع
+│   │   ├── playback/           # صفحة التشغيل
+│   │   └── gps-simulator/      # محاكي GPS
+│   ├── components/
+│   │   └── dashboard/          # مكونات لوحة التحكم
+│   ├── lib/
+│   │   ├── prisma.ts           # Prisma Client
+│   │   └── api.ts              # API Helper
+│   └── styles/
+│       └── globals.css         # الأنماط العامة
+└── package.json
+```
 
-Don't forget to change the package name in package.json
+---
 
-### 5. Commit Message Convention
+## 🗄️ قاعدة البيانات
 
-This starter is using [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/), it is mandatory to use it to commit changes.
+### النماذج الرئيسية
 
-## النشر على Vercel (Deploy to Vercel)
+- **Vehicle** - المركبات
 
-### متطلبات النشر:
+  - معلومات المركبة (الاسم، رقم اللوحة، IMEI)
+  - حالة المركبة (متحركة، متوقفة، مطفأة)
+  - آخر موقع وسرعة
+  - إحصائيات يومية
+  - ربط بالسائق
 
-1. **قاعدة البيانات (Database)**:
+- **Driver** - السائقين
 
-   - أنشئ قاعدة بيانات PostgreSQL على [Vercel Postgres](https://vercel.com/storage/postgres) أو [Supabase](https://supabase.com) أو أي مزود آخر
-   - احصل على `DATABASE_URL` من مزود قاعدة البيانات
+  - معلومات شخصية (الاسم، التليفون، العنوان)
+  - معلومات إضافية (الرقم القومي، المحافظة، تاريخ الميلاد)
+  - ملاحظات
 
-2. **متغيرات البيئة (Environment Variables)**:
-   في Vercel Dashboard → Settings → Environment Variables، أضف:
+- **TrackingPoint** - نقاط التتبع
 
-   ```
-   DATABASE_URL=postgresql://user:password@host:5432/dbname?schema=public
-   NEXT_PUBLIC_APP_URL=https://your-app-name.vercel.app
-   ```
+  - إحداثيات GPS (خط العرض، خط الطول)
+  - السرعة والاتجاه
+  - مستوى البطارية
+  - دقة GPS والارتفاع
+  - الطابع الزمني
 
-   **ملاحظة مهمة**:
+- **DailyReport** - التقارير اليومية
 
-   - `DATABASE_URL`: **مطلوب** - رابط قاعدة البيانات
-   - `NEXT_PUBLIC_APP_URL`: **مطلوب** - رابط التطبيق (استبدل `your-app-name` باسم تطبيقك في Vercel)
-   - بعد النشر، يمكنك الحصول على الرابط من Vercel Dashboard وتحديث `NEXT_PUBLIC_APP_URL`
+  - إحصائيات شاملة لكل يوم
+  - المسافة الكلية والسرعة
+  - وقت الحركة والتوقف
+  - عدد التوقفات وأطول توقف
+  - نقاط البداية والنهاية
 
-3. **خطوات النشر**:
+- **Alert** - التنبيهات
+  - أنواع التنبيهات (سرعة زائدة، توقف طويل، إلخ)
+  - مستوى الخطورة
+  - الموقع المرتبط بالتنبيه
 
-   أ) عبر GitHub:
+### العلاقات
 
-   - ادفع الكود إلى GitHub
-   - اربط المستودع مع Vercel
-   - Vercel سيكتشف Next.js تلقائياً
+- `Vehicle` → `Driver` (Many-to-One) - كل مركبة مرتبطة بسائق واحد
+- `Vehicle` → `TrackingPoint` (One-to-Many) - كل مركبة لها نقاط تتبع متعددة
+- `Vehicle` → `DailyReport` (One-to-Many) - كل مركبة لها تقارير يومية متعددة
 
-   ب) عبر Vercel CLI:
+---
 
-   ```bash
-   npm i -g vercel
-   vercel
-   ```
+## 📡 API Endpoints
 
-4. **بعد النشر**:
+### المركبات (`/api/vehicles`)
 
-   - تأكد من تشغيل Prisma migrations:
+| Method   | Endpoint             | الوصف                                 |
+| -------- | -------------------- | ------------------------------------- |
+| `GET`    | `/api/vehicles`      | جلب جميع المركبات مع معلومات السائقين |
+| `GET`    | `/api/vehicles/[id]` | جلب مركبة محددة                       |
+| `POST`   | `/api/vehicles`      | إضافة مركبة جديدة                     |
+| `PUT`    | `/api/vehicles/[id]` | تحديث مركبة موجودة                    |
+| `DELETE` | `/api/vehicles/[id]` | حذف مركبة                             |
 
-   ```bash
-   vercel env pull .env.local
-   npx prisma migrate deploy
-   ```
+**مثال على POST:**
 
-   أو يمكنك إضافة Build Command في Vercel:
+```json
+{
+  "name": "شاحنة 1",
+  "plateNumber": "أ ب ج 1234",
+  "deviceImei": "123456789012345",
+  "driverId": 1,
+  "status": "moving"
+}
+```
 
-   ```
-   pnpm install && pnpm prisma generate && pnpm build
-   ```
+### السائقين (`/api/drivers`)
 
-### ملاحظات مهمة:
+| Method   | Endpoint            | الوصف                                                |
+| -------- | ------------------- | ---------------------------------------------------- |
+| `GET`    | `/api/drivers`      | جلب جميع السائقين (مع فلترة اختيارية: `?search=اسم`) |
+| `GET`    | `/api/drivers/[id]` | جلب سائق محدد                                        |
+| `POST`   | `/api/drivers`      | إضافة سائق جديد                                      |
+| `PUT`    | `/api/drivers/[id]` | تحديث سائق موجود                                     |
+| `DELETE` | `/api/drivers/[id]` | حذف سائق (يفصل الربط مع المركبات أولاً)              |
 
-- ✅ تم إضافة `postinstall` script في `package.json` لتوليد Prisma Client تلقائياً
-- ✅ `DOMAIN` في `constants.ts` يستخدم `VERCEL_URL` تلقائياً في Vercel
-- ✅ جميع ملفات API routes جاهزة للعمل
-- ✅ `apiFetch` في `src/lib/api.ts` يستخدم `DOMAIN` تلقائياً
+**مثال على POST:**
 
-## Projects using ts-nextjs-tailwind-starter
+```json
+{
+  "name": "أحمد محمد",
+  "phone": "01234567890",
+  "address": "القاهرة، مصر الجديدة",
+  "province": "القاهرة",
+  "nationalId": "12345678901234"
+}
+```
 
-<!--
-TEMPLATE
-- [sitename](https://sitelink.com) ([Source](https://github.com/githublink))
-- [sitename](https://sitelink.com)
--->
+### التقارير (`/api/reports`)
 
-- [theodorusclarence.com](https://theodorusclarence.com) ([Source](https://github.com/theodorusclarence/theodorusclarence.com))
-- [Notiolink](https://notiolink.thcl.dev/) ([Source](https://github.com/theodorusclarence/notiolink))
-- [NextJs + Materia UI + Typescript](https://github.com/AlexStack/nextjs-materia-mui-typescript-hook-form-scaffold-boilerplate-starter)
+| Method | Endpoint       | الوصف                |
+| ------ | -------------- | -------------------- |
+| `GET`  | `/api/reports` | جلب التقارير اليومية |
 
-Are you using this starter? Please add your page (and repo) to the end of the list via a [Pull Request](https://github.com/theodorusclarence/ts-nextjs-tailwind-starter/edit/main/README.md). 😃
+**Query Parameters:**
 
-## Expansion Pack 📦
+- `vehicleId` (optional) - فلترة حسب المركبة
+- `startDate` (optional) - تاريخ البداية (ISO format)
+- `endDate` (optional) - تاريخ النهاية (ISO format)
+- `startTime` (optional) - وقت البداية (HH:mm)
+- `endTime` (optional) - وقت النهاية (HH:mm)
+- `page` (optional) - رقم الصفحة (افتراضي: 1)
+- `limit` (optional) - عدد العناصر في الصفحة (افتراضي: 15)
 
-This starter is now equipped with an [expansion pack](https://github.com/theodorusclarence/expansion-pack).
+**مثال:**
 
-You can easily add expansion such as React Hook Form + Components, Storybook, and more just using a single command line.
+```
+GET /api/reports?vehicleId=1&startDate=2025-01-01&endDate=2025-01-31&page=1&limit=15
+```
 
-<https://user-images.githubusercontent.com/55318172/146631994-e1cac137-1664-4cfe-950b-a96decc1eaa6.mp4>
+### GPS (`/api/gps`)
 
-Check out the [expansion pack repository](https://github.com/theodorusclarence/expansion-pack) for the commands
+| Method | Endpoint   | الوصف                                 |
+| ------ | ---------- | ------------------------------------- |
+| `POST` | `/api/gps` | استقبال بيانات GPS من الأجهزة (JSON)  |
+| `GET`  | `/api/gps` | استقبال بيانات GPS (Query Parameters) |
 
-### App Router Update
+**مثال على POST:**
 
-Due to App Router update, the expansion pack is currently **outdated**. It will be updated in the future. You can still use them by copy and pasting the files.
+```json
+{
+  "deviceImei": "123456789012345",
+  "latitude": 30.0444,
+  "longitude": 31.2357,
+  "speed": 45,
+  "batteryLevel": 85,
+  "timestamp": "2025-01-27T10:30:00Z"
+}
+```
+
+### التتبع (`/api/tracking`)
+
+| Method | Endpoint        | الوصف           |
+| ------ | --------------- | --------------- |
+| `GET`  | `/api/tracking` | جلب نقاط التتبع |
+
+**Query Parameters:**
+
+- `vehicleId` (required) - معرف المركبة
+- `startDate` (optional) - تاريخ البداية
+- `endDate` (optional) - تاريخ النهاية
+- `limit` (optional) - عدد النقاط (افتراضي: 100)
+
+**مثال:**
+
+```
+GET /api/tracking?vehicleId=1&startDate=2025-01-27&endDate=2025-01-27&limit=2000
+```
+
+---
+
+## 🌐 النشر على Vercel
+
+### 1. إعداد قاعدة البيانات
+
+أنشئ قاعدة بيانات PostgreSQL على:
+
+- [Vercel Postgres](https://vercel.com/storage/postgres) - موصى به
+- [Supabase](https://supabase.com) - مجاني وممتاز
+- [Neon](https://neon.tech) - خيار آخر ممتاز
+- أو أي مزود PostgreSQL آخر
+
+### 2. متغيرات البيئة
+
+في Vercel Dashboard → Settings → Environment Variables، أضف:
+
+```env
+DATABASE_URL=postgresql://user:password@host:5432/dbname?schema=public
+NEXT_PUBLIC_SITE_URL=https://your-app-name.vercel.app
+```
+
+**ملاحظات مهمة:**
+
+- `DATABASE_URL`: **مطلوب** - رابط قاعدة البيانات من مزود PostgreSQL
+- `NEXT_PUBLIC_SITE_URL`: **مطلوب** - رابط التطبيق بعد النشر (استبدل `your-app-name` باسم تطبيقك)
+
+### 3. النشر
+
+#### أ) عبر GitHub (موصى به):
+
+1. ادفع الكود إلى GitHub
+2. اذهب إلى [Vercel Dashboard](https://vercel.com/dashboard)
+3. اضغط "Add New Project"
+4. اربط المستودع مع Vercel
+5. Vercel سيكتشف Next.js تلقائياً
+6. أضف متغيرات البيئة
+7. اضغط "Deploy"
+
+#### ب) عبر Vercel CLI:
+
+```bash
+npm i -g vercel
+vercel
+```
+
+### 4. بعد النشر
+
+قم بتشغيل migrations:
+
+```bash
+npx prisma migrate deploy
+```
+
+أو يمكنك إضافة Build Command في Vercel:
+
+```
+pnpm install && pnpm prisma generate && pnpm build
+```
+
+**ملاحظة:** تم إضافة `postinstall` script في `package.json` لتوليد Prisma Client تلقائياً.
+
+---
+
+## 📝 الأوامر المتاحة
+
+```bash
+# التطوير
+pnpm dev              # تشغيل خادم التطوير
+
+# البناء
+pnpm build            # بناء المشروع للإنتاج
+pnpm start            # تشغيل الإنتاج
+
+# الجودة
+pnpm lint             # فحص الكود
+pnpm lint:fix         # إصلاح أخطاء ESLint
+pnpm typecheck        # فحص أنواع TypeScript
+pnpm format           # تنسيق الكود
+
+# الاختبار
+pnpm test             # تشغيل الاختبارات
+pnpm test:watch       # تشغيل الاختبارات في وضع المراقبة
+
+# قاعدة البيانات
+pnpm db:seed          # إضافة بيانات تجريبية
+npx prisma studio     # فتح Prisma Studio
+npx prisma migrate dev # إنشاء migration جديد
+```
+
+---
+
+## 🤝 المساهمة
+
+نرحب بجميع المساهمات! يرجى:
+
+1. Fork المشروع
+2. إنشاء فرع للميزة (`git checkout -b feature/AmazingFeature`)
+3. Commit التغييرات (`git commit -m 'Add some AmazingFeature'`)
+4. Push إلى الفرع (`git push origin feature/AmazingFeature`)
+5. فتح Pull Request
+
+---
+
+## 📄 الترخيص
+
+هذا المشروع مرخص تحت [MIT License](LICENSE).
+
+---
+
+## 👨‍💻 المطور
+
+تم التطوير بواسطة [Tah5721312](https://github.com/Tah5721312)
+
+---
+
+## 🙏 شكر وتقدير
+
+- [Next.js](https://nextjs.org/) - React Framework
+- [Prisma](https://www.prisma.io/) - Next-generation ORM
+- [Leaflet](https://leafletjs.com/) - Open-source JavaScript library for mobile-friendly interactive maps
+- [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework
+
+---
+
+<div align="center">
+  <p>⭐ إذا أعجبك المشروع، لا تنسى إضافة نجمة ⭐</p>
+</div>

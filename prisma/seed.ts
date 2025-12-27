@@ -8,16 +8,63 @@ async function main() {
   // حذف البيانات القديمة إذا كانت موجودة
   console.log('🗑️  حذف البيانات القديمة...');
   await prisma.trackingPoint.deleteMany({});
-  await prisma.trip.deleteMany({});
+  await (prisma as any).dailyReport.deleteMany({});
+  await (prisma as any).alert.deleteMany({});
   await prisma.vehicle.deleteMany({});
+  await (prisma as any).driver.deleteMany({});
   console.log('✅ تم حذف البيانات القديمة');
 
   // إعادة تعيين sequences في PostgreSQL
   console.log('🔄 إعادة تعيين Sequences...');
   await prisma.$executeRawUnsafe(`ALTER SEQUENCE "Vehicle_id_seq" RESTART WITH 1`);
   await prisma.$executeRawUnsafe(`ALTER SEQUENCE "TrackingPoint_id_seq" RESTART WITH 1`);
-  await prisma.$executeRawUnsafe(`ALTER SEQUENCE "Trip_id_seq" RESTART WITH 1`);
+  await prisma.$executeRawUnsafe(`ALTER SEQUENCE "Driver_id_seq" RESTART WITH 1`);
+  await prisma.$executeRawUnsafe(`ALTER SEQUENCE "DailyReport_id_seq" RESTART WITH 1`);
+  await prisma.$executeRawUnsafe(`ALTER SEQUENCE "Alert_id_seq" RESTART WITH 1`);
   console.log('✅ تم إعادة تعيين Sequences');
+
+  // إضافة السائقين أولاً
+  console.log('👤 إضافة السائقين...');
+  const drivers = await Promise.all([
+    (prisma as any).driver.create({
+      data: {
+        name: 'أحمد محمد',
+        phone: '01234567890',
+        address: 'القاهرة، مصر الجديدة',
+        province: 'القاهرة',
+        nationalId: '12345678901234',
+      },
+    }),
+    (prisma as any).driver.create({
+      data: {
+        name: 'محمود علي',
+        phone: '01123456789',
+        address: 'الجيزة، الدقي',
+        province: 'الجيزة',
+        nationalId: '23456789012345',
+      },
+    }),
+    (prisma as any).driver.create({
+      data: {
+        name: 'خالد حسن',
+        phone: '01012345678',
+        address: 'الإسكندرية، سيدي بشر',
+        province: 'الإسكندرية',
+        nationalId: '34567890123456',
+      },
+    }),
+    (prisma as any).driver.create({
+      data: {
+        name: 'عمر سعيد',
+        phone: '01501234567',
+        address: 'القاهرة، المعادي',
+        province: 'القاهرة',
+        nationalId: '45678901234567',
+      },
+    }),
+  ]);
+
+  console.log(`✅ تم إضافة ${drivers.length} سائق`);
 
   // إضافة المركبات
   const vehicles = await Promise.all([
@@ -26,8 +73,7 @@ async function main() {
         name: 'شاحنة 1',
         plateNumber: 'أ ب ج 1234',
         deviceImei: '123456789012345',
-        driverName: 'أحمد محمد',
-        driverPhone: '01234567890',
+        driverId: drivers[0].id,
         status: 'moving',
         lastLatitude: 30.0444,
         lastLongitude: 31.2357,
@@ -40,8 +86,7 @@ async function main() {
         name: 'شاحنة 2',
         plateNumber: 'د ه و 5678',
         deviceImei: '123456789012346',
-        driverName: 'محمود علي',
-        driverPhone: '01123456789',
+        driverId: drivers[1].id,
         status: 'stopped',
         lastLatitude: 30.0500,
         lastLongitude: 31.2400,
@@ -54,8 +99,7 @@ async function main() {
         name: 'شاحنة 3',
         plateNumber: 'ز ح ط 9012',
         deviceImei: '123456789012347',
-        driverName: 'خالد حسن',
-        driverPhone: '01012345678',
+        driverId: drivers[2].id,
         status: 'moving',
         lastLatitude: 30.0350,
         lastLongitude: 31.2200,
@@ -68,8 +112,7 @@ async function main() {
         name: 'شاحنة 4',
         plateNumber: 'ي ك ل 3456',
         deviceImei: '123456789012348',
-        driverName: 'عمر سعيد',
-        driverPhone: '01501234567',
+        driverId: drivers[3].id,
         status: 'turnoff',
         lastLatitude: 30.0600,
         lastLongitude: 31.2500,
@@ -160,32 +203,157 @@ async function main() {
   await Promise.all(trackingPoints);
   console.log(`✅ تم إضافة ${trackingPoints.length} نقطة تتبع (عدة أيام لكل مركبة)`);
 
-  // إضافة رحلات تجريبية
-  const trips = [];
-  for (let i = 0; i < vehicles.length; i++) {
-    const vehicle = vehicles[i];
-    const startTime = new Date();
-    startTime.setHours(8 + i, 30, 0, 0);
-    const endTime = new Date(startTime);
-    endTime.setHours(startTime.getHours() + 4, 15, 0, 0);
+  // إنشاء التقارير اليومية من نقاط التتبع
+  console.log('📊 إنشاء التقارير اليومية...');
+  
+  // دالة لحساب المسافة بين نقطتين (Haversine formula)
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371; // نصف قطر الأرض بالكيلومتر
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // المسافة بالكيلومتر
+  };
 
-    trips.push(
-      prisma.trip.create({
+  // جلب جميع نقاط التتبع
+  const allTrackingPoints = await prisma.trackingPoint.findMany({
+    orderBy: { timestamp: 'asc' }
+  });
+
+  // تجميع النقاط حسب المركبة والتاريخ
+  const pointsByVehicleAndDate = new Map<string, any[]>();
+  
+  allTrackingPoints.forEach(point => {
+    const date = new Date(point.timestamp);
+    date.setHours(0, 0, 0, 0);
+    const key = `${point.vehicleId}_${date.toISOString().split('T')[0]}`;
+    
+    if (!pointsByVehicleAndDate.has(key)) {
+      pointsByVehicleAndDate.set(key, []);
+    }
+    pointsByVehicleAndDate.get(key)!.push(point);
+  });
+
+  // إنشاء تقرير لكل مجموعة
+  const reports: Promise<any>[] = [];
+  
+  for (const [key, points] of Array.from(pointsByVehicleAndDate.entries())) {
+    if (points.length < 2) continue; // نحتاج نقطتين على الأقل
+    
+    const [vehicleId, dateStr] = key.split('_');
+    const reportDate = new Date(dateStr);
+    
+    // ترتيب النقاط حسب الوقت
+    points.sort((a: any, b: any) => a.timestamp.getTime() - b.timestamp.getTime());
+    
+    // حساب الإحصائيات
+    let totalDistance = 0;
+    let maxSpeed = 0;
+    let totalSpeed = 0;
+    let movingTime = 0; // بالدقائق
+    let stoppedTime = 0; // بالدقائق
+    let numberOfStops = 0;
+    let longestStop = 0; // بالدقائق
+    let currentStopStart: Date | null = null;
+    let isMoving = false;
+    
+    const firstMovement = points[0].timestamp;
+    const lastMovement = points[points.length - 1].timestamp;
+    const startLat = points[0].latitude;
+    const startLng = points[0].longitude;
+    const endLat = points[points.length - 1].latitude;
+    const endLng = points[points.length - 1].longitude;
+    
+    for (let i = 1; i < points.length; i++) {
+      const prev = points[i - 1];
+      const curr = points[i];
+      
+      // حساب المسافة
+      const distance = calculateDistance(
+        prev.latitude,
+        prev.longitude,
+        curr.latitude,
+        curr.longitude
+      );
+      totalDistance += distance;
+      
+      // السرعة
+      if (curr.speed > maxSpeed) {
+        maxSpeed = curr.speed;
+      }
+      totalSpeed += curr.speed;
+      
+      // حساب الوقت بين النقطتين (بالدقائق)
+      const timeDiff = (curr.timestamp.getTime() - prev.timestamp.getTime()) / (1000 * 60);
+      
+      // تحديد إذا كانت المركبة متحركة (سرعة > 5 كم/س) أو متوقفة
+      const wasMoving = prev.speed > 5;
+      const isCurrentlyMoving = curr.speed > 5;
+      
+      if (isCurrentlyMoving) {
+        movingTime += timeDiff;
+        if (currentStopStart) {
+          // انتهى التوقف
+          const stopDuration = (curr.timestamp.getTime() - currentStopStart.getTime()) / (1000 * 60);
+          if (stopDuration > longestStop) {
+            longestStop = stopDuration;
+          }
+          currentStopStart = null;
+        }
+        isMoving = true;
+      } else {
+        stoppedTime += timeDiff;
+        if (!currentStopStart) {
+          // بدأ توقف جديد
+          currentStopStart = prev.timestamp;
+          numberOfStops++;
+          isMoving = false;
+        }
+      }
+      
+      // إذا كانت آخر نقطة ومازالت متوقفة
+      if (i === points.length - 1 && currentStopStart && !isCurrentlyMoving) {
+        const stopDuration = (curr.timestamp.getTime() - currentStopStart.getTime()) / (1000 * 60);
+        if (stopDuration > longestStop) {
+          longestStop = stopDuration;
+        }
+      }
+    }
+    
+    const avgSpeed = points.length > 0 ? totalSpeed / points.length : 0;
+    const totalDuration = Math.round((lastMovement.getTime() - firstMovement.getTime()) / (1000 * 60));
+    
+    // إنشاء التقرير
+    reports.push(
+      (prisma as any).dailyReport.create({
         data: {
-          vehicleId: vehicle.id,
-          startTime: startTime,
-          endTime: endTime,
-          distance: Math.random() * 150 + 50,
-          avgSpeed: Math.random() * 30 + 25,
-          maxSpeed: Math.random() * 40 + 60,
-          stops: Math.floor(Math.random() * 5) + 1,
+          vehicleId: parseInt(vehicleId),
+          date: reportDate,
+          totalDistance: Math.round(totalDistance * 100) / 100, // تقريب لرقمين عشريين
+          totalDuration: totalDuration,
+          totalStoppedTime: Math.round(stoppedTime),
+          totalMovingTime: Math.round(movingTime),
+          maxSpeed: Math.round(maxSpeed * 100) / 100,
+          avgSpeed: Math.round(avgSpeed * 100) / 100,
+          numberOfStops: numberOfStops,
+          longestStop: Math.round(longestStop),
+          firstMovement: firstMovement,
+          lastMovement: lastMovement,
+          startLat: startLat,
+          startLng: startLng,
+          endLat: endLat,
+          endLng: endLng,
         },
       })
     );
   }
-
-  await Promise.all(trips);
-  console.log(`✅ تم إضافة ${trips.length} رحلة`);
+  
+  await Promise.all(reports);
+  console.log(`✅ تم إنشاء ${reports.length} تقرير يومي`);
 
   console.log('🎉 تم إضافة جميع البيانات التجريبية بنجاح!');
 }
