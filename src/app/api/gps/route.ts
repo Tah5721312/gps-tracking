@@ -8,7 +8,11 @@ async function processGPSData(data: any) {
   const latitude = data.latitude || data.lat;
   const longitude = data.longitude || data.lng || data.lon;
   const speed = data.speed || data.spd || 0;
-  const batteryLevel = data.batteryLevel || data.battery || data.bat || 100;
+  // معالجة batteryLevel بشكل صحيح - query parameters تأتي كـ strings
+  const batteryLevelRaw = data.batteryLevel ?? data.battery ?? data.bat ?? 100;
+  const batteryLevel = batteryLevelRaw !== undefined && batteryLevelRaw !== null && batteryLevelRaw !== ''
+    ? Number(batteryLevelRaw)
+    : 100;
   const timestamp = data.timestamp || data.time || data.date;
 
   // التحقق من البيانات المطلوبة
@@ -38,14 +42,14 @@ async function processGPSData(data: any) {
   const wasMoving = (vehicle.lastSpeed || 0) > 5;
   // إذا كانت المركبة مطفأة (turnoff)، لا نحدث الحالة إلا إذا بدأت الحركة
   const isTurnedOff = vehicle.status === 'turnoff';
-  
+
   const trackingPoint = await prisma.trackingPoint.create({
     data: {
       vehicleId: vehicle.id,
       latitude: parseFloat(latitude),
       longitude: parseFloat(longitude),
       speed: currentSpeed,
-      batteryLevel: parseInt(batteryLevel || 100),
+      batteryLevel: Math.max(0, Math.min(100, Math.round(batteryLevel))), // التأكد من أن القيمة بين 0 و 100
       timestamp: currentTime
     }
   });
@@ -105,7 +109,7 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   const R = 6371; // نصف قطر الأرض بالكيلومتر
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = 
+  const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
     Math.sin(dLon / 2) * Math.sin(dLon / 2);
@@ -118,7 +122,7 @@ export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
     const result = await processGPSData(data);
-    
+
     if (result.error) {
       return NextResponse.json(
         { error: result.error },
@@ -141,14 +145,14 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const data: any = {};
-    
+
     // استخراج البيانات من query parameters
     searchParams.forEach((value, key) => {
       data[key] = value;
     });
 
     const result = await processGPSData(data);
-    
+
     if (result.error) {
       return NextResponse.json(
         { error: result.error },
