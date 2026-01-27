@@ -40,8 +40,6 @@ async function processGPSData(data: any) {
   const currentSpeed = parseFloat(speed || 0);
   const isMoving = currentSpeed > 5;
   const wasMoving = (vehicle.lastSpeed || 0) > 5;
-  // إذا كانت المركبة مطفأة (turnoff)، لا نحدث الحالة إلا إذا بدأت الحركة
-  const isTurnedOff = vehicle.status === 'turnoff';
 
   const trackingPoint = await prisma.trackingPoint.create({
     data: {
@@ -54,12 +52,24 @@ async function processGPSData(data: any) {
     }
   });
 
+  // تحديد حالة المركبة بناءً على السرعة
+  // إذا كانت المركبة متحركة (سرعة > 5)، تصبح moving بغض النظر عن حالتها السابقة
+  // إذا كانت متوقفة (سرعة <= 5)، تصبح stopped (وليس turnoff إلا إذا مر وقت طويل)
+  let newStatus: 'moving' | 'stopped' | 'turnoff';
+  if (isMoving) {
+    newStatus = 'moving';
+  } else {
+    // إذا كانت متوقفة، نستخدم stopped (وليس turnoff)
+    // turnoff يتم تعيينه فقط من checkAndUpdateVehicleStatus إذا مر وقت طويل بدون تحديث
+    newStatus = 'stopped';
+  }
+
   // حساب وقت الوقوف
   let updateData: any = {
     lastLatitude: parseFloat(latitude),
     lastLongitude: parseFloat(longitude),
     lastSpeed: currentSpeed,
-    status: isTurnedOff && !isMoving ? 'turnoff' : (isMoving ? 'moving' : 'stopped'),
+    status: newStatus,
     lastUpdate: currentTime
   };
 
