@@ -123,7 +123,7 @@ export default function GPSSimulator() {
 
     const fetchLiveData = async () => {
       try {
-        const response = await apiFetch(`/api/vehicles/${selectedVehicle.deviceImei}/live`);
+        const response = await apiFetch(`/api/vehicles/live/${selectedVehicle.deviceImei}`);
         if (response.ok) {
           const data = await response.json();
           // تحديث البيانات من API (Source of Truth)

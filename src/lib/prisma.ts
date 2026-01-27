@@ -19,8 +19,14 @@ if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;
 
   // إغلاق الاتصال عند إيقاف التطبيق (فقط في development)
-  process.on('beforeExit', async () => {
-    await prisma.$disconnect();
-  });
+  // التحقق من عدم إضافة listener مكرر
+  const disconnectListenerKey = '__disconnectListenerAdded';
+  if (!(globalForPrisma as any)[disconnectListenerKey]) {
+    process.on('beforeExit', async () => {
+      await prisma.$disconnect();
+    });
+    // وضع علامة لتجنب إضافة listener مكرر
+    (globalForPrisma as any)[disconnectListenerKey] = true;
+  }
 }
 
