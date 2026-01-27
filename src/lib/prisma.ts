@@ -5,6 +5,7 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
+// إعدادات Prisma Client مع دعم Neon DB
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
@@ -12,4 +13,11 @@ export const prisma =
   });
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+
+// إغلاق الاتصال عند إيقاف التطبيق
+if (process.env.NODE_ENV !== 'production') {
+  process.on('beforeExit', async () => {
+    await prisma.$disconnect();
+  });
+}
 
