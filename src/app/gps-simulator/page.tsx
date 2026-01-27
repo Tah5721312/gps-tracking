@@ -23,8 +23,8 @@ export default function GPSSimulator() {
   const [lastSent, setLastSent] = useState<Date | null>(null);
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
   const [statusMessage, setStatusMessage] = useState('');
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const [direction, setDirection] = useState(0); // الاتجاه بالدرجات (0-360)
+  const sendIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // جلب المركبات
   useEffect(() => {
@@ -117,76 +117,64 @@ export default function GPSSimulator() {
     }, 2000);
   }, []);
 
-  // محاكاة حركة المركبة
-  const moveVehicle = () => {
-    if (speed > 0) {
-      // حساب المسافة المقطوعة خلال ثانية واحدة (متر)
-      const distanceInMeters = speed / 3.6; // السرعة من كم/س إلى م/ث
-      
-      // تحويل المسافة إلى درجات (تقريبي: 1 درجة ≈ 111 كم = 111000 متر)
-      const distanceInDegrees = distanceInMeters / 111000;
-      
-      // تحديث الاتجاه بشكل عشوائي قليلاً (محاكاة منعطفات)
-      let newDirection = direction;
-      if (Math.random() > 0.85) {
-        // تغيير الاتجاه بزاوية عشوائية بين -45 و +45 درجة
-        newDirection = (direction + (Math.random() * 90 - 45) + 360) % 360;
-        setDirection(newDirection);
-      }
-      
-      // حساب التغيير في خطوط الطول والعرض بناءً على الاتجاه
-      const radians = (newDirection * Math.PI) / 180;
-      const latChange = distanceInDegrees * Math.cos(radians);
-      // خط الطول يحتاج تصحيح حسب خط العرض (cos(latitude))
-      const lngChange = (distanceInDegrees * Math.sin(radians)) / Math.cos(currentLocation.lat * Math.PI / 180);
-      
-      setCurrentLocation(prev => ({
-        lat: prev.lat + latChange,
-        lng: prev.lng + lngChange
-      }));
-
-      // تقليل البطارية تدريجياً
-      if (Math.random() > 0.9) {
-        setBattery(prev => Math.max(20, prev - 0.1));
-      }
-    }
-  };
-
-  // تحريك المركبة بشكل مستمر عند السرعة > 0
+  // Polling لجلب آخر حالة من API (Source of Truth)
   useEffect(() => {
-    if (!isRunning || speed === 0) return;
+    if (!selectedVehicle) return;
 
-    // تحريك المركبة كل ثانية
-    const moveInterval = setInterval(() => {
-      moveVehicle();
-    }, 1000);
+    const fetchLiveData = async () => {
+      try {
+        const response = await apiFetch(`/api/vehicles/${selectedVehicle.deviceImei}/live`);
+        if (response.ok) {
+          const data = await response.json();
+          // تحديث البيانات من API (Source of Truth)
+          setCurrentLocation({
+            lat: data.latitude,
+            lng: data.longitude
+          });
+          setSpeed(data.speed);
+          setBattery(data.batteryLevel);
+        }
+      } catch (error) {
+        console.error('Error fetching live data:', error);
+      }
+    };
 
-    return () => clearInterval(moveInterval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRunning, speed]);
+    // جلب البيانات فوراً
+    fetchLiveData();
 
-  // إرسال البيانات تلقائياً
+    // Polling كل 3 ثواني
+    pollIntervalRef.current = setInterval(fetchLiveData, 5000);
+
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+    };
+  }, [selectedVehicle]);
+
+  // إرسال البيانات تلقائياً (Simulator فقط - لا حركة محلية)
   useEffect(() => {
     // تنظيف interval السابق
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
+    if (sendIntervalRef.current) {
+      clearInterval(sendIntervalRef.current);
+      sendIntervalRef.current = null;
     }
 
     if (!isRunning || !selectedVehicle) return;
 
     // إرسال أولي
     sendGPSData();
-    
+
     // إعداد interval للإرسال التلقائي
-    intervalRef.current = setInterval(() => {
+    sendIntervalRef.current = setInterval(() => {
       sendGPSData();
     }, sendInterval * 1000);
 
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
+      if (sendIntervalRef.current) {
+        clearInterval(sendIntervalRef.current);
+        sendIntervalRef.current = null;
       }
     };
   }, [isRunning, sendInterval, selectedVehicle, sendGPSData]);
@@ -196,12 +184,30 @@ export default function GPSSimulator() {
     sendGPSData();
   };
 
-  // إعادة تعيين الموقع
-  const resetLocation = () => {
-    setCurrentLocation({ lat: 30.0444, lng: 31.2357 });
-    setSpeed(0);
-    setBattery(100);
-    setDirection(Math.random() * 360); // اتجاه عشوائي جديد
+  // إعادة تعيين الموقع (إرسال GPS جديد)
+  const resetLocation = async () => {
+    if (!selectedVehicle) return;
+
+    // إرسال GPS مع موقع افتراضي
+    try {
+      await apiFetch('/api/gps', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          deviceImei: selectedVehicle.deviceImei,
+          latitude: 30.0444,
+          longitude: 31.2357,
+          speed: 0,
+          batteryLevel: 100,
+          timestamp: new Date().toISOString()
+        })
+      });
+      // البيانات ستُحدث تلقائياً من Polling
+    } catch (error) {
+      console.error('Error resetting location:', error);
+    }
   };
 
   return (
@@ -319,11 +325,10 @@ export default function GPSSimulator() {
             <button
               onClick={() => setIsRunning(!isRunning)}
               disabled={!selectedVehicle}
-              className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-medium transition flex-1 sm:flex-none ${
-                isRunning
-                  ? 'bg-yellow-600 hover:bg-yellow-700 text-white'
-                  : 'bg-green-600 hover:bg-green-700 text-white'
-              } disabled:bg-gray-400 disabled:cursor-not-allowed`}
+              className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-medium transition flex-1 sm:flex-none ${isRunning
+                ? 'bg-yellow-600 hover:bg-yellow-700 text-white'
+                : 'bg-green-600 hover:bg-green-700 text-white'
+                } disabled:bg-gray-400 disabled:cursor-not-allowed`}
             >
               {isRunning ? (
                 <>
@@ -358,11 +363,10 @@ export default function GPSSimulator() {
 
           {/* حالة الإرسال */}
           {status !== 'idle' && (
-            <div className={`p-3 sm:p-4 rounded-lg mb-4 text-sm sm:text-base ${
-              status === 'success' ? 'bg-green-50 border border-green-200 text-green-800' :
+            <div className={`p-3 sm:p-4 rounded-lg mb-4 text-sm sm:text-base ${status === 'success' ? 'bg-green-50 border border-green-200 text-green-800' :
               status === 'error' ? 'bg-red-50 border border-red-200 text-red-800' :
-              'bg-blue-50 border border-blue-200 text-blue-800'
-            }`}>
+                'bg-blue-50 border border-blue-200 text-blue-800'
+              }`}>
               <p className="font-medium">
                 {status === 'sending' && '⏳ جاري الإرسال...'}
                 {status === 'success' && '✅ ' + statusMessage}

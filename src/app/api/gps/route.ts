@@ -52,17 +52,10 @@ async function processGPSData(data: any) {
     }
   });
 
-  // تحديد حالة المركبة بناءً على السرعة
-  // إذا كانت المركبة متحركة (سرعة > 5)، تصبح moving بغض النظر عن حالتها السابقة
-  // إذا كانت متوقفة (سرعة <= 5)، تصبح stopped (وليس turnoff إلا إذا مر وقت طويل)
-  let newStatus: 'moving' | 'stopped' | 'turnoff';
-  if (isMoving) {
-    newStatus = 'moving';
-  } else {
-    // إذا كانت متوقفة، نستخدم stopped (وليس turnoff)
-    // turnoff يتم تعيينه فقط من checkAndUpdateVehicleStatus إذا مر وقت طويل بدون تحديث
-    newStatus = 'stopped';
-  }
+  // تحديد حالة المركبة بناءً على السرعة (Source of Truth)
+  // speed > 5 = moving, speed <= 5 = stopped
+  // turnoff يتم تعيينه فقط إذا مر وقت طويل بدون تحديث
+  const newStatus: 'moving' | 'stopped' | 'turnoff' = isMoving ? 'moving' : 'stopped';
 
   // حساب وقت الوقوف
   let updateData: any = {
