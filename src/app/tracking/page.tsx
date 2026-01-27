@@ -41,6 +41,8 @@ function TrackingPageContent() {
   const [routePolyline, setRoutePolyline] = useState<L.Polyline | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [destinationNameAr, setDestinationNameAr] = useState<string>('');
+  const [deviceImei, setDeviceImei] = useState<string | null>(null);
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
@@ -48,39 +50,56 @@ function TrackingPageContent() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const leafletRef = useRef<typeof L | null>(null);
 
-  // جلب بيانات المركبة
-  const fetchVehicle = async () => {
+  // جلب بيانات المركبة الأساسية (مرة واحدة فقط) للحصول على deviceImei
+  const fetchVehicleInfo = async () => {
     if (!vehicleId) return;
 
     try {
-      setIsUpdating(true);
       const response = await apiFetch(`/api/vehicles/${vehicleId}`);
       if (response.ok) {
         const data = await response.json();
         const v = data.vehicle;
 
+        // حفظ deviceImei للاستخدام في polling
+        if (v.deviceImei) {
+          setDeviceImei(v.deviceImei);
+          // جلب آخر حالة مباشرة من API (Source of Truth)
+          fetchLiveVehicleData(v.deviceImei, v);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching vehicle info:', error);
+    }
+  };
+
+  // جلب آخر حالة المركبة من API (Source of Truth)
+  const fetchLiveVehicleData = async (imei: string, vehicleInfo?: any) => {
+    try {
+      setIsUpdating(true);
+      const response = await apiFetch(`/api/vehicles/live/${imei}`);
+      if (response.ok) {
+        const data = await response.json();
+
         const formattedVehicle: Vehicle = {
-          id: v.id,
-          name: v.name,
-          plate: v.plateNumber,
-          deviceImei: v.deviceImei,
-          lat: v.lastLatitude || 30.0444,
-          lng: v.lastLongitude || 31.2357,
-          speed: v.lastSpeed || 0,
-          status: (v.status || 'turnoff') as 'moving' | 'stopped' | 'turnoff',
-          driver: v.driverName || 'غير محدد',
-          driverPhone: v.driverPhone || undefined,
-          lastUpdate: v.lastUpdate ? new Date(v.lastUpdate) : new Date(),
-          battery: (v.latestTrackingPoint?.batteryLevel !== undefined && v.latestTrackingPoint?.batteryLevel !== null)
-            ? Number(v.latestTrackingPoint.batteryLevel)
-            : 100,
-          createdAt: v.createdAt ? new Date(v.createdAt) : new Date(),
+          id: data.vehicleId || vehicleInfo?.id || 0,
+          name: vehicleInfo?.name || 'غير محدد',
+          plate: vehicleInfo?.plateNumber || 'غير محدد',
+          deviceImei: data.imei || imei,
+          lat: data.latitude || 30.0444,
+          lng: data.longitude || 31.2357,
+          speed: data.speed || 0,
+          status: (data.status || 'turnoff') as 'moving' | 'stopped' | 'turnoff',
+          driver: data.driver?.name || vehicleInfo?.driver?.name || 'غير محدد',
+          driverPhone: data.driver?.phone || vehicleInfo?.driver?.phone || undefined,
+          lastUpdate: data.lastUpdate ? new Date(data.lastUpdate) : new Date(),
+          battery: data.batteryLevel ?? 100,
+          createdAt: vehicleInfo?.createdAt ? new Date(vehicleInfo.createdAt) : new Date(),
         };
 
         setVehicle(formattedVehicle);
       }
     } catch (error) {
-      console.error('Error fetching vehicle:', error);
+      console.error('Error fetching live vehicle data:', error);
     } finally {
       setIsUpdating(false);
     }
@@ -453,26 +472,35 @@ function TrackingPageContent() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // جلب البيانات عند التحميل
+  // جلب البيانات عند التحميل (مرة واحدة فقط للحصول على deviceImei)
   useEffect(() => {
     if (vehicleId) {
-      fetchVehicle();
+      fetchVehicleInfo();
       setLoading(false);
     } else {
       router.push('/dashboard');
     }
   }, [vehicleId]);
 
-  // تحديث البيانات كل 5 ثواني
+  // Polling لجلب آخر حالة من API (Source of Truth) كل 3 ثواني
   useEffect(() => {
-    if (!vehicleId) return;
+    if (!deviceImei) return;
 
-    const interval = setInterval(() => {
-      fetchVehicle();
-    }, 5000);
+    // جلب البيانات فوراً
+    fetchLiveVehicleData(deviceImei);
 
-    return () => clearInterval(interval);
-  }, [vehicleId]);
+    // Polling كل 3 ثواني
+    pollIntervalRef.current = setInterval(() => {
+      fetchLiveVehicleData(deviceImei);
+    }, 3000);
+
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+    };
+  }, [deviceImei]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
