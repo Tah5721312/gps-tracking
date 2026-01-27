@@ -54,13 +54,13 @@ export default function GPSTrackingDashboard() {
     const lastUpdate = v.lastUpdate ? new Date(v.lastUpdate) : now;
     const stoppedAt = v.stoppedAt ? new Date(v.stoppedAt) : null;
     const isCurrentlyStopped = v.status === 'stopped' && stoppedAt;
-    
+
     // حساب وقت الوقوف الحالي إذا كانت المركبة متوقفة الآن
     let currentStoppedTime = 0;
     if (isCurrentlyStopped && stoppedAt) {
       currentStoppedTime = Math.floor((now.getTime() - stoppedAt.getTime()) / 1000);
     }
-    
+
     return {
       id: v.id,
       name: v.name,
@@ -74,7 +74,9 @@ export default function GPSTrackingDashboard() {
       driverPhone: v.driver?.phone || undefined,
       driverId: v.driverId || null,
       lastUpdate: lastUpdate,
-      battery: v.latestTrackingPoint?.batteryLevel || 100,
+      battery: (v.latestTrackingPoint?.batteryLevel !== undefined && v.latestTrackingPoint?.batteryLevel !== null)
+        ? Number(v.latestTrackingPoint.batteryLevel)
+        : 100,
       createdAt: v.createdAt ? new Date(v.createdAt) : now,
       stoppedAt: stoppedAt,
       totalStoppedTime: v.totalStoppedTime || 0,
@@ -84,7 +86,7 @@ export default function GPSTrackingDashboard() {
 
   // دالة مساعدة للحصول على لون الحالة
   const getStatusColor = (status: string) => {
-    switch(status) {
+    switch (status) {
       case 'moving': return 'bg-green-500';
       case 'stopped': return 'bg-red-500';
       case 'turnoff': return 'bg-gray-500';
@@ -94,7 +96,7 @@ export default function GPSTrackingDashboard() {
 
   // دالة مساعدة للحصول على نص الحالة
   const getStatusText = (status: string) => {
-    switch(status) {
+    switch (status) {
       case 'moving': return 'متحركة';
       case 'stopped': return 'متوقفة';
       case 'turnoff': return 'مطفأة';
@@ -212,11 +214,10 @@ export default function GPSTrackingDashboard() {
             <div className="flex border-t border-gray-200">
               <button
                 onClick={() => setActiveTab('map')}
-                className={`py-4 px-6 font-medium transition ${
-                  activeTab === 'map'
-                    ? 'border-b-2 border-blue-600 text-blue-600'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
+                className={`py-4 px-6 font-medium transition ${activeTab === 'map'
+                  ? 'border-b-2 border-blue-600 text-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+                  }`}
               >
                 <div className="flex items-center gap-2">
                   <MapPin className="w-5 h-5" />
@@ -226,11 +227,10 @@ export default function GPSTrackingDashboard() {
 
               <button
                 onClick={() => setActiveTab('vehicles')}
-                className={`py-4 px-6 font-medium transition ${
-                  activeTab === 'vehicles'
-                    ? 'border-b-2 border-blue-600 text-blue-600'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
+                className={`py-4 px-6 font-medium transition ${activeTab === 'vehicles'
+                  ? 'border-b-2 border-blue-600 text-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+                  }`}
               >
                 <div className="flex items-center gap-2">
                   <Settings className="w-5 h-5" />
@@ -241,11 +241,10 @@ export default function GPSTrackingDashboard() {
 
               <button
                 onClick={() => setActiveTab('drivers')}
-                className={`py-4 px-6 font-medium transition ${
-                  activeTab === 'drivers'
-                    ? 'border-b-2 border-blue-600 text-blue-600'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
+                className={`py-4 px-6 font-medium transition ${activeTab === 'drivers'
+                  ? 'border-b-2 border-blue-600 text-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+                  }`}
               >
                 <div className="flex items-center gap-2">
                   <Truck className="w-5 h-5" />
@@ -253,14 +252,13 @@ export default function GPSTrackingDashboard() {
                 </div>
               </button>
 
-              
+
               <button
                 onClick={() => setActiveTab('reports')}
-                className={`py-4 px-6 font-medium transition ${
-                  activeTab === 'reports'
-                    ? 'border-b-2 border-blue-600 text-blue-600'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
+                className={`py-4 px-6 font-medium transition ${activeTab === 'reports'
+                  ? 'border-b-2 border-blue-600 text-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+                  }`}
               >
                 <div className="flex items-center gap-2">
                   <Calendar className="w-5 h-5" />
@@ -268,7 +266,7 @@ export default function GPSTrackingDashboard() {
                 </div>
               </button>
 
-            
+
             </div>
           </div>
         </header>
@@ -329,7 +327,7 @@ export default function GPSTrackingDashboard() {
             />
           )}
 
-          
+
         </div>
       </div>
     </div>

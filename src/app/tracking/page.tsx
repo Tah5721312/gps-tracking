@@ -71,7 +71,9 @@ function TrackingPageContent() {
           driver: v.driverName || 'غير محدد',
           driverPhone: v.driverPhone || undefined,
           lastUpdate: v.lastUpdate ? new Date(v.lastUpdate) : new Date(),
-          battery: v.latestTrackingPoint?.batteryLevel || 100,
+          battery: (v.latestTrackingPoint?.batteryLevel !== undefined && v.latestTrackingPoint?.batteryLevel !== null)
+            ? Number(v.latestTrackingPoint.batteryLevel)
+            : 100,
           createdAt: v.createdAt ? new Date(v.createdAt) : new Date(),
         };
 
@@ -96,11 +98,11 @@ function TrackingPageContent() {
         }
       );
       const data = await response.json();
-      
+
       if (data.display_name) {
         const address = data.address || {};
         let name = data.display_name;
-        
+
         // تحسين اسم المكان
         if (address.road || address.house_number) {
           const parts = [];
@@ -114,7 +116,7 @@ function TrackingPageContent() {
           name = address.building || address.amenity;
           if (address.road) name += ` - ${address.road}`;
         }
-        
+
         setDestinationNameAr(name);
         return name;
       }
@@ -144,7 +146,7 @@ function TrackingPageContent() {
       try {
         // تحميل CSS
         await import('leaflet/dist/leaflet.css');
-        
+
         // تحميل Leaflet
         const leaflet = await import('leaflet');
         const L = leaflet.default;
@@ -415,7 +417,7 @@ function TrackingPageContent() {
       });
 
       destinationMarkerRef.current = L.marker(endPos, { icon: destinationIcon }).addTo(mapRef.current);
-      
+
       // تحديث popup الوجهة بالاسم العربي
       const destinationName = destinationNameAr || trip.destinationName || 'موقع محدد';
       destinationMarkerRef.current.bindPopup(`
@@ -551,8 +553,8 @@ function TrackingPageContent() {
           {/* الخريطة */}
           <div className="lg:col-span-2 order-2 lg:order-1">
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden border border-gray-200/50 hover:shadow-2xl transition-shadow duration-300">
-              <div 
-                className="w-full relative" 
+              <div
+                className="w-full relative"
                 ref={mapContainerRef}
                 style={{
                   height: '600px',

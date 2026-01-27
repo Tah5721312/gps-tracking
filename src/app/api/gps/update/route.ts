@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
-    
+
     // البيانات المتوقعة من جهاز GPS
     const {
       deviceImei,      // رقم الجهاز الفريد
@@ -35,6 +35,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // معالجة batteryLevel بشكل صحيح
+    let finalBatteryLevel = 100; // القيمة الافتراضية
+    if (batteryLevel !== undefined && batteryLevel !== null && String(batteryLevel).trim() !== '') {
+      finalBatteryLevel = Number(batteryLevel);
+    }
+    finalBatteryLevel = Math.max(0, Math.min(100, Math.round(finalBatteryLevel)));
+
     // حفظ نقطة التتبع في قاعدة البيانات
     const trackingPoint = await prisma.trackingPoint.create({
       data: {
@@ -42,7 +49,7 @@ export async function POST(request: NextRequest) {
         latitude: parseFloat(latitude),
         longitude: parseFloat(longitude),
         speed: parseFloat(speed || 0),
-        batteryLevel: parseInt(batteryLevel || 100),
+        batteryLevel: finalBatteryLevel,
         timestamp: timestamp ? new Date(timestamp) : new Date()
       }
     });
