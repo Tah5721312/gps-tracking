@@ -38,14 +38,14 @@ export default function VehiclesModel({
   vehicle,
   onSave,
   getStatusColor,
-  getStatusText
+  getStatusText,
 }: VehiclesModelProps) {
   const [formData, setFormData] = React.useState({
     name: '',
     plate: '',
     deviceImei: '',
     driverId: null as number | null,
-    status: 'turnoff' as 'moving' | 'stopped' | 'turnoff'
+    status: 'turnoff' as 'moving' | 'stopped' | 'turnoff',
   });
   const [drivers, setDrivers] = React.useState<Driver[]>([]);
   const [loadingDrivers, setLoadingDrivers] = React.useState(false);
@@ -79,7 +79,7 @@ export default function VehiclesModel({
         plate: vehicle.plate,
         deviceImei: vehicle.deviceImei,
         driverId: vehicle.driverId || null,
-        status: vehicle.status
+        status: vehicle.status,
       });
     }
   }, [vehicle]);
@@ -91,74 +91,95 @@ export default function VehiclesModel({
     onSave({
       ...vehicle!,
       ...formData,
-      driver: drivers.find(d => d.id === formData.driverId)?.name || '',
-      driverPhone: drivers.find(d => d.id === formData.driverId)?.phone || undefined
+      driver: drivers.find((d) => d.id === formData.driverId)?.name || '',
+      driverPhone:
+        drivers.find((d) => d.id === formData.driverId)?.phone || undefined,
     });
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className='fixed inset-0 z-50 flex items-center justify-center'>
       {/* Backdrop with blur */}
-      <div 
-        className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+      <div
+        className='absolute inset-0 bg-black/30 backdrop-blur-sm'
         onClick={onClose}
       />
-      
+
       {/* Modal */}
-      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center rounded-t-lg">
-          <h3 className="text-xl font-bold text-gray-900">تعديل مركبة</h3>
+      <div className='relative bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto'>
+        <div className='sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center rounded-t-lg'>
+          <h3 className='text-xl font-bold text-gray-900'>
+            تعديل مركبة / موبايل{' '}
+          </h3>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition"
+            className='text-gray-500 hover:text-gray-700 transition'
           >
-            <X className="w-5 h-5" />
+            <X className='w-5 h-5' />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className='p-6'>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">اسم المركبة *</label>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
+                اسم المركبة / الموبايل*
+              </label>
               <input
-                type="text"
+                type='text'
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="مثال: شاحنة 1"
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+                placeholder='مثال: شاحنة 1'
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">رقم اللوحة *</label>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
+                رقم اللوحة *
+              </label>
               <input
-                type="text"
+                type='text'
                 value={formData.plate}
-                onChange={(e) => setFormData({ ...formData, plate: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="مثال: ABC-123"
-                required
+                onChange={(e) =>
+                  setFormData({ ...formData, plate: e.target.value })
+                }
+                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+                placeholder='مثال: ABC-123'
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">IMEI الجهاز *</label>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
+                IMEI الجهاز *
+              </label>
               <input
-                type="text"
+                type='text'
                 value={formData.deviceImei}
-                onChange={(e) => setFormData({ ...formData, deviceImei: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="مثال: 123456789012345"
+                onChange={(e) =>
+                  setFormData({ ...formData, deviceImei: e.target.value })
+                }
+                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+                placeholder='مثال: 123456789012345'
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">السائق</label>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
+                السائق/المالك *
+              </label>
               <select
                 value={formData.driverId || ''}
-                onChange={(e) => setFormData({ ...formData, driverId: e.target.value ? parseInt(e.target.value) : null })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    driverId: e.target.value ? parseInt(e.target.value) : null,
+                  })
+                }
+                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
               >
-                <option value="">-- اختر سائق --</option>
+                <option value=''>-- اختر سائق --</option>
                 {loadingDrivers ? (
                   <option disabled>جاري التحميل...</option>
                 ) : (
@@ -171,30 +192,37 @@ export default function VehiclesModel({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">حالة المركبة</label>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
+                حالة المركبة/الموبايل
+              </label>
               <select
                 value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value as 'moving' | 'stopped' | 'turnoff' })}
-                className="w-full px-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    status: e.target.value as 'moving' | 'stopped' | 'turnoff',
+                  })
+                }
+                className='w-full px-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
               >
-                <option value="turnoff">مطفأة</option>
-                <option value="stopped">متوقفة</option>
-                <option value="moving">متحركة</option>
+                <option value='turnoff'>مطفأة</option>
+                <option value='stopped'>متوقفة</option>
+                <option value='moving'>متحركة</option>
               </select>
             </div>
           </div>
 
-          <div className="mt-6 flex gap-2 justify-end">
+          <div className='mt-6 flex gap-2 justify-end'>
             <button
-              type="button"
+              type='button'
               onClick={onClose}
-              className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
+              className='px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition'
             >
               إلغاء
             </button>
             <button
-              type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              type='submit'
+              className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition'
             >
               حفظ التعديلات
             </button>
@@ -204,4 +232,3 @@ export default function VehiclesModel({
     </div>
   );
 }
-

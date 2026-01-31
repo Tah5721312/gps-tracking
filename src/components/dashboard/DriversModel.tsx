@@ -121,7 +121,7 @@ export default function DriversModel({
       <div className="relative bg-white rounded-lg shadow-xl w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center rounded-t-lg z-10">
           <h3 className="text-xl font-bold text-gray-900">
-            {isEditing ? 'تعديل سائق' : 'إضافة سائق جديد'}
+            {isEditing ? 'تعديل سائق/مستخدم' : 'إضافة سائق/مستخدم جديد'}
           </h3>
           <button
             onClick={onClose}
@@ -249,7 +249,7 @@ export default function DriversModel({
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
             >
               <Save className="w-4 h-4" />
-              {isEditing ? 'حفظ التعديلات' : 'إضافة سائق'}
+              {isEditing ? 'حفظ التعديلات' : 'إضافة سائق/مستخدم'}
             </button>
           </div>
         </form>

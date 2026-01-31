@@ -174,8 +174,8 @@ export default function DriversTab() {
     <div className="p-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-2">إدارة السائقين</h3>
-          <p className="text-sm text-gray-600">إضافة وتعديل وحذف السائقين</p>
+          <h3 className="text-2xl font-bold text-gray-900 mb-2">إدارة السائقين/المستخدمين</h3>
+          <p className="text-sm text-gray-600">إضافة وتعديل وحذف السائقين/المستخدمين</p>
         </div>
         <div className="flex gap-2">
           <div className="relative">
@@ -196,7 +196,7 @@ export default function DriversTab() {
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
-            إضافة سائق
+            إضافة سائق/مستخدم
           </button>
         </div>
       </div>

@@ -140,7 +140,7 @@ export default function VehiclesTab({
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-xl font-bold text-gray-900">إدارة المركبات</h3>
+        <h3 className="text-xl font-bold text-gray-900">إدارة المركبات/الموبايلات</h3>
         <button
           onClick={() => {
             setShowAddForm(true);
@@ -217,7 +217,7 @@ export default function VehiclesTab({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">اسم السائق</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">اسم السائق/المالك *</label>
               <input
                 type="text"
                 value={editingVehicle ? editingVehicle.driver : formData.driverName}
@@ -233,7 +233,7 @@ export default function VehiclesTab({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">رقم هاتف السائق</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف </label>
               <input
                 type="tel"
                 value={editingVehicle ? (editingVehicle.driverPhone || '') : formData.driverPhone}
@@ -291,17 +291,17 @@ export default function VehiclesTab({
         <table className="w-full text-sm">
           <thead className="bg-gray-100 border-b-2">
             <tr>
-              <th className="px-4 py-3 text-center font-bold text-gray-700">اسم المركبة</th>
+              <th className="px-4 py-3 text-center font-bold text-gray-700">اسم المركبة/الموبايل</th>
               <th className="px-4 py-3 text-center font-bold text-gray-700">رقم اللوحة</th>
               <th className="px-4 py-3 text-center font-bold text-gray-700">IMEI</th>
-              <th className="px-4 py-3 text-center font-bold text-gray-700">السائق</th>
-              <th className="px-4 py-3 text-center font-bold text-gray-700">هاتف السائق</th>
+              <th className="px-4 py-3 text-center font-bold text-gray-700">السائق/المالك</th>
+              <th className="px-4 py-3 text-center font-bold text-gray-700">رقم الهاتف </th>
               <th className="px-4 py-3 text-center font-bold text-gray-700">الحالة</th>
               <th className="px-4 py-3 text-center font-bold text-gray-700">أخر سرعة</th>
               <th className="px-4 py-3 text-center font-bold text-gray-700">آخر تحديث</th>
               <th className="px-4 py-3 text-center font-bold text-gray-700">الإجراءات</th>
             </tr>
-          </thead>
+          </thead>  
           <tbody className="divide-y">
             {vehicles.length === 0 ? (
               <tr>

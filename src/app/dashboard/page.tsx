@@ -191,8 +191,8 @@ export default function GPSTrackingDashboard() {
               <div className="flex items-center gap-3">
                 <Truck className="w-8 h-8 text-blue-600" />
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">نظام تتبع المركبات GPS</h1>
-                  <p className="text-sm text-gray-600">مراقبة مباشرة لأسطول المركبات</p>
+                  <h1 className="text-2xl font-bold text-gray-900">نظام تتبع  GPS</h1>
+                  <p className="text-sm text-gray-600">مراقبة مباشرة لأسطول المركبات / الموبايلات</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
@@ -234,7 +234,7 @@ export default function GPSTrackingDashboard() {
               >
                 <div className="flex items-center gap-2">
                   <Settings className="w-5 h-5" />
-                  إدارة المركبات
+                  إدارة المركبات/الموبايلات
                 </div>
               </button>
 
@@ -248,7 +248,7 @@ export default function GPSTrackingDashboard() {
               >
                 <div className="flex items-center gap-2">
                   <Truck className="w-5 h-5" />
-                  إدارة السائقين
+                إدارة السائقين/المستخدمين
                 </div>
               </button>
 

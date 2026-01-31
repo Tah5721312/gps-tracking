@@ -163,7 +163,7 @@ export default function MapComponent({ vehicles, selectedVehicle, onVehicleClick
       <div style="font-family: Arial; direction: rtl; padding: 8px; min-width: 200px;">
         <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold;">${vehicle.name}</h3>
         <p style="margin: 4px 0; font-size: 13px;"><strong>لوحة:</strong> ${vehicle.plate}</p>
-        <p style="margin: 4px 0; font-size: 13px;"><strong>السائق:</strong> ${vehicle.driver}</p>
+        <p style="margin: 4px 0; font-size: 13px;"><strong>السائق/المالك:</strong> ${vehicle.driver}</p>
         ${vehicle.driverPhone ? `<p style="margin: 4px 0; font-size: 13px;"><strong>رقم التليفون:</strong> ${vehicle.driverPhone}</p>` : ''}
         <p style="margin: 4px 0; font-size: 13px;"><strong>السرعة:</strong> ${Math.round(vehicle.speed)} كم/س</p>
         <p class="popup-battery" style="margin: 4px 0; font-size: 13px;"><strong>البطارية:</strong> ${Math.round(vehicle.battery)}%</p>
