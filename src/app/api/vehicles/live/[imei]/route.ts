@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/auth';
 
 // GET: جلب آخر حالة مركبة بناءً على IMEI
 export async function GET(
@@ -7,6 +9,19 @@ export async function GET(
   { params }: { params: Promise<{ imei: string }> }
 ) {
   try {
+    // التحقق من الجلسة
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'غير مصرح' },
+        { status: 401 }
+      );
+    }
+
+    const user = session.user as any;
+    const userId = parseInt(user.id as string);
+    const userRole = user.role as string;
+
     const { imei } = await params;
 
     // البحث عن المركبة بناءً على IMEI
@@ -27,6 +42,14 @@ export async function GET(
       return NextResponse.json(
         { error: 'Vehicle not found' },
         { status: 404 }
+      );
+    }
+
+    // التحقق من الملكية - USER يمكنه رؤية فقط مركباته
+    if (userRole !== 'ADMIN' && vehicle.userId !== userId) {
+      return NextResponse.json(
+        { error: 'غير مصرح بالوصول إلى هذه المركبة' },
+        { status: 403 }
       );
     }
 

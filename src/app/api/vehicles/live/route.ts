@@ -1,11 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/auth';
 
 // GET: جلب آخر حالة لجميع المركبات (للخريطة)
 export async function GET(request: NextRequest) {
   try {
+    // الحصول على المستخدم الحالي
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'غير مصرح' },
+        { status: 401 }
+      );
+    }
+
+    const user = session.user as any;
+    const userId = parseInt(user.id as string);
+    const userRole = user.role as string;
+
+    // بناء شرط where - ADMIN يرى كل المركبات، USER يرى فقط مركباته
+    const whereClause: any = {};
+    if (userRole !== 'ADMIN') {
+      whereClause.userId = userId;
+    }
+
     // جلب جميع المركبات (بدون driver - غير مستخدم في response)
     const vehicles = await prisma.vehicle.findMany({
+      where: whereClause,
       orderBy: {
         id: 'asc'
       }

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/auth';
 
 // GET - جلب سائق محدد
 export async function GET(
@@ -7,6 +9,18 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // الحصول على المستخدم الحالي
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'غير مصرح' },
+        { status: 401 }
+      );
+    }
+
+    const user = session.user as any;
+    const userId = parseInt(user.id as string);
+    const userRole = user.role as string;
     const { id: idParam } = await params;
     const id = parseInt(idParam);
 
@@ -31,6 +45,14 @@ export async function GET(
       );
     }
 
+    // التحقق من الملكية - USER يمكنه رؤية فقط سائقيه
+    if (userRole !== 'ADMIN' && driver.userId !== userId) {
+      return NextResponse.json(
+        { error: 'غير مصرح بالوصول إلى هذا السائق' },
+        { status: 403 }
+      );
+    }
+
     return NextResponse.json(driver);
   } catch (error) {
     console.error('Error fetching driver:', error);
@@ -47,6 +69,18 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // الحصول على المستخدم الحالي
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'غير مصرح' },
+        { status: 401 }
+      );
+    }
+
+    const user = session.user as any;
+    const userId = parseInt(user.id as string);
+    const userRole = user.role as string;
     const { id: idParam } = await params;
     const id = parseInt(idParam);
     const body = await request.json();
@@ -72,10 +106,21 @@ export async function PUT(
       );
     }
 
-    // التحقق من عدم تكرار رقم التليفون (إذا تم تغييره)
+    // التحقق من الملكية - USER يمكنه تعديل فقط سائقيه
+    if (userRole !== 'ADMIN' && existingDriver.userId !== userId) {
+      return NextResponse.json(
+        { error: 'غير مصرح بتعديل هذا السائق' },
+        { status: 403 }
+      );
+    }
+
+    // التحقق من عدم تكرار رقم التليفون (إذا تم تغييره) - فقط ضمن سائقين المستخدم
     if (phone !== existingDriver.phone) {
-      const phoneExists = await (prisma as any).driver.findUnique({
-        where: { phone }
+      const phoneExists = await (prisma as any).driver.findFirst({
+        where: {
+          phone,
+          userId: userRole === 'ADMIN' ? undefined : userId // ADMIN يمكنه التحقق من الكل
+        }
       });
 
       if (phoneExists) {
@@ -86,10 +131,13 @@ export async function PUT(
       }
     }
 
-    // التحقق من عدم تكرار الرقم القومي (إذا تم تغييره)
+    // التحقق من عدم تكرار الرقم القومي (إذا تم تغييره) - فقط ضمن سائقين المستخدم
     if (nationalId && nationalId !== existingDriver.nationalId) {
-      const nationalIdExists = await (prisma as any).driver.findUnique({
-        where: { nationalId }
+      const nationalIdExists = await (prisma as any).driver.findFirst({
+        where: {
+          nationalId,
+          userId: userRole === 'ADMIN' ? undefined : userId // ADMIN يمكنه التحقق من الكل
+        }
       });
 
       if (nationalIdExists) {
@@ -138,6 +186,18 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // الحصول على المستخدم الحالي
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'غير مصرح' },
+        { status: 401 }
+      );
+    }
+
+    const user = session.user as any;
+    const userId = parseInt(user.id as string);
+    const userRole = user.role as string;
     const { id: idParam } = await params;
     const id = parseInt(idParam);
 
@@ -153,6 +213,14 @@ export async function DELETE(
       return NextResponse.json(
         { error: 'السائق غير موجود' },
         { status: 404 }
+      );
+    }
+
+    // التحقق من الملكية - USER يمكنه حذف فقط سائقيه
+    if (userRole !== 'ADMIN' && driver.userId !== userId) {
+      return NextResponse.json(
+        { error: 'غير مصرح بحذف هذا السائق' },
+        { status: 403 }
       );
     }
 

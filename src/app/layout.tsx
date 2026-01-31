@@ -5,6 +5,8 @@ import '@/styles/globals.css';
 // !STARTERCONF This is for demo purposes, remove @/styles/colors.css import immediately
 
 import { siteConfig } from '@/constant/config';
+import Navigation from '@/components/Navigation';
+import Providers from '@/components/Providers';
 
 // !STARTERCONF Change these default meta
 // !STARTERCONF Look at @/constant/config to change them
@@ -63,7 +65,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ar" dir="rtl">
-      <body>{children}</body>
+          <body>
+        <Providers>
+          <Navigation />
+
+          <main className="container mx-auto p-4">
+            {children}
+          </main>
+        </Providers>
+
+        </body>
     </html>
   );
 }

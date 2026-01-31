@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/auth';
 
 // دالة للتحقق من آخر تحديث GPS وتحديث الحالة تلقائياً
 async function checkAndUpdateVehicleStatus(vehicle: any) {
   const GPS_TIMEOUT_MINUTES = 5; // إذا لم يصل تحديث GPS لمدة 5 دقائق، تصبح المركبة مطفأة
   const now = new Date();
-  
+
   // إذا لم يكن هناك lastUpdate، المركبة مطفأة مع سرعة 0
   if (!vehicle.lastUpdate) {
     if (vehicle.status !== 'turnoff') {
@@ -42,7 +44,20 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // الحصول على المستخدم الحالي
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'غير مصرح' },
+        { status: 401 }
+      );
+    }
+
+    const user = session.user as any;
+    const userId = parseInt(user.id as string);
+    const userRole = user.role as string;
     const { id } = await params;
+
     const vehicle = await prisma.vehicle.findUnique({
       where: { id: parseInt(id) },
       include: {
@@ -63,6 +78,14 @@ export async function GET(
       );
     }
 
+    // التحقق من الملكية - USER يمكنه رؤية فقط مركباته
+    if (userRole !== 'ADMIN' && vehicle.userId !== userId) {
+      return NextResponse.json(
+        { error: 'غير مصرح بالوصول إلى هذه المركبة' },
+        { status: 403 }
+      );
+    }
+
     // جلب آخر نقطة تتبع
     const lastTrackingPoint = await prisma.trackingPoint.findFirst({
       where: { vehicleId: parseInt(id) },
@@ -72,7 +95,7 @@ export async function GET(
     // التحقق من آخر تحديث GPS وتحديث الحالة تلقائياً
     const updatedVehicle = await checkAndUpdateVehicleStatus(vehicle);
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       vehicle: {
         ...updatedVehicle,
         latestTrackingPoint: lastTrackingPoint
@@ -93,9 +116,41 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // الحصول على المستخدم الحالي
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'غير مصرح' },
+        { status: 401 }
+      );
+    }
+
+    const user = session.user as any;
+    const userId = parseInt(user.id as string);
+    const userRole = user.role as string;
     const { id } = await params;
+
+    // التحقق من الملكية قبل التحديث
+    const existingVehicle = await prisma.vehicle.findUnique({
+      where: { id: parseInt(id) }
+    });
+
+    if (!existingVehicle) {
+      return NextResponse.json(
+        { error: 'Vehicle not found' },
+        { status: 404 }
+      );
+    }
+
+    if (userRole !== 'ADMIN' && existingVehicle.userId !== userId) {
+      return NextResponse.json(
+        { error: 'غير مصرح بتعديل هذه المركبة' },
+        { status: 403 }
+      );
+    }
+
     const data = await request.json();
-    
+
     const vehicle = await prisma.vehicle.update({
       where: { id: parseInt(id) },
       data: {
@@ -132,9 +187,40 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // الحصول على المستخدم الحالي
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'غير مصرح' },
+        { status: 401 }
+      );
+    }
+
+    const user = session.user as any;
+    const userId = parseInt(user.id as string);
+    const userRole = user.role as string;
     const { id } = await params;
     const vehicleId = parseInt(id);
-    
+
+    // التحقق من الملكية قبل الحذف
+    const existingVehicle = await prisma.vehicle.findUnique({
+      where: { id: vehicleId }
+    });
+
+    if (!existingVehicle) {
+      return NextResponse.json(
+        { error: 'Vehicle not found' },
+        { status: 404 }
+      );
+    }
+
+    if (userRole !== 'ADMIN' && existingVehicle.userId !== userId) {
+      return NextResponse.json(
+        { error: 'غير مصرح بحذف هذه المركبة' },
+        { status: 403 }
+      );
+    }
+
     // حذف جميع نقاط التتبع المرتبطة
     await prisma.trackingPoint.deleteMany({
       where: { vehicleId: vehicleId }

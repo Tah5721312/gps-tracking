@@ -22,10 +22,14 @@ enum VehicleStatus {
 // ═══════════════════════════════════════════════════════════
 
 model Vehicle {
-  id          Int    @id @default(autoincrement())
-  name        String // اسم المركبة (مثل: سيارة 1)
-  plateNumber String @unique // رقم اللوحة
-  deviceImei  String @unique // IMEI جهاز GPS
+  id          Int     @id @default(autoincrement())
+  name        String  // اسم المركبة (مثل: سيارة 1)
+  plateNumber String? // رقم اللوحة (اختياري)
+  deviceImei  String  @unique // IMEI جهاز GPS
+
+  // ربط المستخدم (المالك)
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // ربط السائق
   driverId Int? // معرف السائق
@@ -61,6 +65,7 @@ model Vehicle {
   @@index([status])
   @@index([lastUpdate])
   @@index([driverId])
+  @@index([userId])
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -77,6 +82,10 @@ model Driver {
   birthDate  DateTime? @db.Date // تاريخ الميلاد
   notes      String?   @db.Text // ملاحظات
 
+  // ربط المستخدم (المالك)
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -85,6 +94,7 @@ model Driver {
 
   @@index([name])
   @@index([phone])
+  @@index([userId])
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -178,4 +188,36 @@ model Alert {
 
   @@index([vehicleId, isRead])
   @@index([createdAt(sort: Desc)])
+}
+
+
+enum UserRole {
+  USER  // مستخدم عادي
+  ADMIN // مدير
+}
+
+
+// ═══════════════════════════════════════════════════════════
+// 👤 MODEL: User - المستخدمين
+// ═══════════════════════════════════════════════════════════
+
+model User {
+  id        Int      @id @default(autoincrement())
+  firstName String
+  lastName  String
+  email     String   @unique
+  password  String   // hashed password
+  role      UserRole @default(USER) // ADMIN أو USER
+  isActive  Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // العلاقات
+  vehicles Vehicle[] // المركبات المملوكة لهذا المستخدم
+  drivers  Driver[]  // السائقين المملوكين لهذا المستخدم
+
+  @@index([email])
+  @@index([role])
+  @@index([isActive])
 }

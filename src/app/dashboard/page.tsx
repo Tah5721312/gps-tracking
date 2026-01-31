@@ -248,7 +248,7 @@ export default function GPSTrackingDashboard() {
               >
                 <div className="flex items-center gap-2">
                   <Truck className="w-5 h-5" />
-                إدارة السائقين/المستخدمين
+                  إدارة السائقين/المستخدمين
                 </div>
               </button>
 
@@ -262,7 +262,7 @@ export default function GPSTrackingDashboard() {
               >
                 <div className="flex items-center gap-2">
                   <Calendar className="w-5 h-5" />
-                  التقارير اليومية
+                  التقارير و الحصائيات
                 </div>
               </button>
 
