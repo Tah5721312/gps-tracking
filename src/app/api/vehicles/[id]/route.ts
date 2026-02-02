@@ -87,9 +87,11 @@ export async function GET(
     }
 
     // جلب آخر نقطة تتبع
+    // استخدام createdAt بدلاً من timestamp لأن timestamp قد يكون من المستقبل (bug شائع في أجهزة GPS)
+    // createdAt = source of truth (وقت الإدخال الفعلي في قاعدة البيانات)
     const lastTrackingPoint = await prisma.trackingPoint.findFirst({
       where: { vehicleId: parseInt(id) },
-      orderBy: { timestamp: 'desc' }
+      orderBy: { createdAt: 'desc' } // ✅ الأحدث حسب وقت الإدخال، ليس GPS time
     });
 
     // التحقق من آخر تحديث GPS وتحديث الحالة تلقائياً

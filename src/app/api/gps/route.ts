@@ -36,7 +36,8 @@ async function processGPSData(data: any) {
   }
 
   // حفظ نقطة التتبع في قاعدة البيانات
-  const currentTime = timestamp ? new Date(timestamp) : new Date();
+  // تجاهل timestamp من الجهاز - استخدام الوقت الحالي دائماً لضمان الترتيب الصحيح
+  const currentTime = new Date();
   const currentSpeed = parseFloat(speed || 0);
   const isMoving = currentSpeed > 5;
   const wasMoving = (vehicle.lastSpeed || 0) > 5;
