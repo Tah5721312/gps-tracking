@@ -1,26 +1,13 @@
-import RegisterForm from "./RegisterForm";
-import Hero from "@/components/Hero";
-
-
+import RegisterForm from './RegisterForm';
 
 const RegisterPage = () => {
   return (
+    <>
+      <RegisterForm />
 
-     <>
-      <Hero />
-
-   
-        <RegisterForm />
-   
-  
       {/* <Footer /> */}
     </>
- 
+  );
+};
 
-
-
- 
-  )
-}
-
-export default RegisterPage
+export default RegisterPage;

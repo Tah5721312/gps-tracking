@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { Menu, X, LogIn, UserPlus, LogOut, Activity } from 'lucide-react';
+import UserImageUpload from './UserImageUpload';
 
 export default function Navigation() {
   const pathname = usePathname();
@@ -39,8 +40,8 @@ export default function Navigation() {
         href={href}
         onClick={onClick}
         className={`relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 flex items-center gap-2 group ${isActive
-            ? 'bg-blue-50 text-blue-600 shadow-sm'
-            : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
+          ? 'bg-blue-50 text-blue-600 shadow-sm'
+          : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
           }`}
       >
         {isActive && (
@@ -55,8 +56,8 @@ export default function Navigation() {
   return (
     <nav
       className={`sticky top-0 z-50 transition-all duration-300 border-b ${scrolled
-          ? 'bg-white/90 backdrop-blur-md border-gray-200 shadow-lg shadow-gray-100/50'
-          : 'bg-white border-transparent shadow-none'
+        ? 'bg-white/90 backdrop-blur-md border-gray-200 shadow-lg shadow-gray-100/50'
+        : 'bg-white border-transparent shadow-none'
         }`}
       dir="rtl"
     >
@@ -92,14 +93,20 @@ export default function Navigation() {
               <div className="flex items-center gap-3">
                 <Link
                   href="/login"
-                  className="px-5 py-2.5 rounded-xl text-sm font-semibold text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-all duration-300 flex items-center gap-2"
+                  className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${pathname === '/login'
+                    ? 'text-white bg-linear-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/25'
+                    : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
+                    }`}
                 >
                   <LogIn className="w-4 h-4" />
                   تسجيل الدخول
                 </Link>
                 <Link
                   href="/register"
-                  className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transform hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2"
+                  className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${pathname === '/register'
+                    ? 'text-white bg-linear-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/25'
+                    : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
+                    }`}
                 >
                   <UserPlus className="w-4 h-4" />
                   مستخدم جديد
@@ -107,9 +114,14 @@ export default function Navigation() {
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                <div className="flex flex-col items-end mr-2">
-                  <span className="text-xs text-gray-400 font-medium">مرحباً بك</span>
-                  <span className="text-sm font-bold text-gray-800">{(session?.user as any)?.name || 'مستخدم'}</span>
+                <div className="flex items-center gap-3">
+                  <div className="pt-4 [&_img]:w-15! [&_img]:h-15! [&_img]:border-2! [&_img]:border-white! [&_img]:shadow-md!">
+                    <UserImageUpload />
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className="text-xs text-gray-400 font-medium">مرحباً بك</span>
+                    <span className="text-sm font-bold text-gray-800">{(session?.user as any)?.name || 'مستخدم'}</span>
+                  </div>
                 </div>
                 <button
                   onClick={() => signOut({ redirect: true, callbackUrl: '/login' })}
@@ -157,8 +169,8 @@ export default function Navigation() {
               href={item.href}
               onClick={() => setIsMobileOpen(false)}
               className={`block px-4 py-3 rounded-xl text-base font-medium transition-all duration-200 ${pathname === item.href
-                  ? 'bg-blue-50 text-blue-600 shadow-sm border border-blue-100'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                ? 'bg-blue-50 text-blue-600 shadow-sm border border-blue-100'
+                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                 }`}
             >
               {item.label}
@@ -170,7 +182,10 @@ export default function Navigation() {
               <Link
                 href="/login"
                 onClick={() => setIsMobileOpen(false)}
-                className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 transition-colors"
+                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${pathname === '/login'
+                  ? 'text-white bg-blue-600 shadow-lg shadow-blue-500/30'
+                  : 'text-gray-700 bg-gray-50 hover:bg-gray-100'
+                  }`}
               >
                 <LogIn className="w-4 h-4" />
                 تسجيل الدخول
@@ -178,7 +193,10 @@ export default function Navigation() {
               <Link
                 href="/register"
                 onClick={() => setIsMobileOpen(false)}
-                className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-colors"
+                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${pathname === '/register'
+                  ? 'text-white bg-blue-600 shadow-lg shadow-blue-500/30'
+                  : 'text-gray-700 bg-gray-50 hover:bg-gray-100'
+                  }`}
               >
                 <UserPlus className="w-4 h-4" />
                 مستخدم جديد
@@ -186,9 +204,14 @@ export default function Navigation() {
             </div>
           ) : (
             <div className="mt-4 pt-4 border-t border-gray-100 space-y-3">
-              <div className="px-2 flex items-center justify-between">
-                <span className="text-sm text-gray-500">تم تسجيل الدخول كـ</span>
-                <span className="text-sm font-bold text-gray-900">{(session?.user as any)?.name || 'مستخدم'}</span>
+              <div className="px-2 flex items-center gap-3">
+                <div className="[&_img]:w-10! [&_img]:h-10! [&_img]:border-2! [&_img]:border-gray-200!">
+                  <UserImageUpload />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-500">تم تسجيل الدخول كـ</span>
+                  <span className="text-sm font-bold text-gray-900">{(session?.user as any)?.name || 'مستخدم'}</span>
+                </div>
               </div>
               <button
                 onClick={() => {

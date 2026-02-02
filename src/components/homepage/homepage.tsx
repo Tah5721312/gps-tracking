@@ -1,42 +1,69 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Truck, MapPin } from 'lucide-react';
+import Hero from '@/components/Hero';
+import { useSession } from 'next-auth/react';
 
 export default function HomepageClient() {
+  const { data: session } = useSession();
+
   return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center" dir="rtl">
-      <div className="text-center">
-                     <div className="flex justify-between items-center py-4">
-                      <div className="flex items-center gap-3">
-                        <Truck className="w-8 h-8 text-blue-600" />
-                        <div>
-                          <h1 className="text-2xl font-bold text-gray-900">نظام تتبع GPS</h1>
-                          <p className="text-sm text-gray-600">مراقبة مباشرة لأسطول المركبات / الموبايلات</p>
-                        </div>
-                      </div>
-                    </div> 
-        <div className="flex items-center justify-center gap-3 mb-8">
-          <Truck className="w-12 h-12 text-blue-600" />
-          <h1 className="text-4xl font-bold text-gray-900">نظام تتبع المركبات GPS</h1>
+    <main className="relative min-h-screen flex flex-col items-center justify-center overflow-x-hidden overflow-y-auto -m-4 w-full max-w-none" dir="rtl">
+      {/* Full Screen Background Image */}
+      <div className="fixed inset-0 w-full h-full -z-10">
+        <Image
+          src="https://res.cloudinary.com/dr8ivazek/image/upload/v1770062057/2149764129_jo3xqw.jpg"
+          alt="Background"
+          fill
+          priority
+          sizes="100vw"
+          className="object-fill"
+          style={{ objectFit: 'fill', width: '100%', height: '100%' }}
+          quality={100}
+        />
+        {/* Modern Overlay with Gradient */}
+        <div className="absolute inset-0 bg-linear-to-b from-black/70 via-black/50 to-black/80 backdrop-blur-[2px]" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-12 py-12 items-center">
+
+        {/* Hero Section with text color override for dark background */}
+        <div className="w-full [&_h1]:text-white! [&_div]:text-white!">
+          <Hero />
         </div>
-        <p className="text-gray-600 mb-8">مراقبة وإدارة أسطول الشحن لحظياً</p>
-        <div className="flex gap-4 justify-center">
-          <Link
-            href="/dashboard"
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center gap-2"
-          >
-            <MapPin className="w-5 h-5" />
-            لوحة التحكم
-          </Link>
-          <Link
-            href="/gps-simulator"
-            className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium flex items-center gap-2"
-          >
-            <Truck className="w-5 h-5" />
-            محاكي GPS
-          </Link>
+
+        {/* Action Card */}
+        <div className="w-full max-w-lg">
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 sm:p-10 shadow-2xl transform transition-all hover:scale-[1.01] duration-300">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-8 drop-shadow-md">
+              نظام تتبع المركبات
+            </h2>
+
+            <div className="flex flex-col gap-4">
+              <Link
+                href="/dashboard"
+                className="group relative px-6 py-4 bg-linear-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 rounded-xl text-white font-bold shadow-lg hover:shadow-blue-500/30 transition-all duration-300 flex items-center justify-center gap-3 w-full"
+              >
+                <MapPin className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                <span className="relative text-lg">لوحة التحكم</span>
+              </Link>
+
+              {/* GPS Simulator - Admin Only */}
+              {(session?.user as any)?.role === 'ADMIN' && (
+                <Link
+                  href="/gps-simulator"
+                  className="group relative px-6 py-4 bg-linear-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 rounded-xl text-white font-bold shadow-lg hover:shadow-emerald-500/30 transition-all duration-300 flex items-center justify-center gap-3 w-full"
+                >
+                  <Truck className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                  <span className="relative text-lg">محاكي GPS</span>
+                </Link>
+              )}
+            </div>
+          </div>
         </div>
+
       </div>
     </main>
   );

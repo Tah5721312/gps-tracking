@@ -54,11 +54,10 @@ const RegisterForm = () => {
             </svg>
           </div>
           <h1 className="text-4xl font-bold bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">
-            إنشاء حساب
+            Create Your Account
           </h1>
-          <p className=" text-lg">
-            انضم إلينا وابدأ رحلتك اليوم
-          </p>
+          <p className=' text-lg'>Register to continue your journey</p>
+
         </div>
 
         {/* Form Card */}
@@ -205,13 +204,13 @@ const RegisterForm = () => {
 
         {/* Footer Text */}
         <p className="text-center text-sm text-gray-500 mt-8">
-          By creating an account, you agree to our{" "}
+          بإنشاء حساب، فإنك توافق على{" "}
           <a href="#" className="text-blue-600 hover:text-blue-700 font-medium">
-            Terms
+            الشروط والأحكام
           </a>{" "}
-          and{" "}
+          و{" "}
           <a href="#" className="text-blue-600 hover:text-blue-700 font-medium">
-            Privacy Policy
+            سياسة الخصوصية
           </a>
         </p>
       </div>

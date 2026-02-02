@@ -48,6 +48,8 @@ export const authOptions: NextAuthOptions = {
               email: true,
               password: true,
               role: true,
+              // @ts-ignore - image field exists in schema but TypeScript types not updated yet
+              image: true,
             },
           });
 
@@ -88,6 +90,7 @@ export const authOptions: NextAuthOptions = {
             name: `${user.firstName} ${user.lastName}`,
             email: user.email,
             role: user.role,
+            image: (user as any).image,
           };
 
           console.log(`✅ Authentication successful for user: ${email}`);
@@ -105,12 +108,39 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       // JWT callback يتم استدعاؤه بشكل متكرر - لا نضع console logs هنا
       if (user) {
         token.id = (user as any).id;
         token.userId = (user as any).id;
         token.role = (user as any).role ?? 'USER';
+        token.image = (user as any).image;
+      }
+
+      // عند تحديث الـ session (مثلاً بعد رفع صورة جديدة)
+      if (trigger === 'update' && token.userId) {
+        try {
+          const updatedUser = await prisma.user.findUnique({
+            where: { id: Number(token.userId) },
+            select: {
+              firstName: true,
+              lastName: true,
+              email: true,
+              role: true,
+              // @ts-ignore
+              image: true,
+            },
+          });
+
+          if (updatedUser) {
+            token.name = `${updatedUser.firstName} ${updatedUser.lastName}`;
+            token.email = updatedUser.email;
+            token.role = updatedUser.role;
+            token.image = (updatedUser as any).image;
+          }
+        } catch (error) {
+          console.error('Error updating token:', error);
+        }
       }
 
       return token;
@@ -123,6 +153,7 @@ export const authOptions: NextAuthOptions = {
         name: session.user?.name || "",
         email: session.user?.email || "",
         role: String((token as any).role ?? 'USER'),
+        image: (token as any).image || null,
       } as any;
 
       return session;

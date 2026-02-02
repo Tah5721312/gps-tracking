@@ -207,6 +207,7 @@ model User {
   lastName  String
   email     String   @unique
   password  String   // hashed password
+  image     String?  // رابط الصورة من Cloudinary
   role      UserRole @default(USER) // ADMIN أو USER
   isActive  Boolean  @default(true)
 

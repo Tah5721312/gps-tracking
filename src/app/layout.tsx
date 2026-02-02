@@ -65,7 +65,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ar" dir="rtl">
-          <body>
+      <body className="overflow-x-hidden">
         <Providers>
           <Navigation />
 
@@ -74,7 +74,7 @@ export default function RootLayout({
           </main>
         </Providers>
 
-        </body>
+      </body>
     </html>
   );
 }
