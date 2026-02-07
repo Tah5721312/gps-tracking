@@ -48,7 +48,7 @@ export default function MapComponent({ vehicles, selectedVehicle, onVehicleClick
 
         // تحميل CSS
         await import('leaflet/dist/leaflet.css');
-        
+
         // تحميل Leaflet
         const leaflet = await import('leaflet');
         const L = leaflet.default;
@@ -155,7 +155,7 @@ export default function MapComponent({ vehicles, selectedVehicle, onVehicleClick
     return `
       <style>
         @media (max-width: 639px) {
-          .popup-battery, .popup-last-update {
+          .popup-last-update {
             display: none !important;
           }
         }
@@ -169,9 +169,9 @@ export default function MapComponent({ vehicles, selectedVehicle, onVehicleClick
         <p class="popup-battery" style="margin: 4px 0; font-size: 13px;"><strong>البطارية:</strong> ${Math.round(vehicle.battery)}%</p>
         <p style="margin: 4px 0; font-size: 13px;"><strong>الحالة:</strong> ${
           vehicle.status === 'moving' ? 'متحركة' : 
-          vehicle.status === 'stopped' ? 'متوقفة' : 
+        vehicle.status === 'stopped' ? 'متوقفة' :
           'مطفأة'
-        }</p>
+      }</p>
         <p class="popup-last-update" style="margin: 4px 0; font-size: 11px; color: #666;"><strong>آخر تحديث:</strong> ${vehicle.lastUpdate.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}</p>
         <button id="track-btn-${vehicle.id}" style="
           width: 100%;
@@ -222,7 +222,7 @@ export default function MapComponent({ vehicles, selectedVehicle, onVehicleClick
 
     const position: [number, number] = [vehicle.lat, vehicle.lng];
     console.log('Adding/updating marker for vehicle:', vehicle.name, 'at', position);
-    
+
     // إنشاء أيقونة مخصصة
     const icon = L.divIcon({
       className: 'custom-marker',
@@ -231,11 +231,10 @@ export default function MapComponent({ vehicles, selectedVehicle, onVehicleClick
           width: 20px;
           height: 20px;
           border-radius: 50%;
-          background-color: ${
-            vehicle.status === 'moving' ? '#10b981' : 
-            vehicle.status === 'stopped' ? '#ef4444' : 
+          background-color: ${vehicle.status === 'moving' ? '#10b981' :
+          vehicle.status === 'stopped' ? '#ef4444' :
             '#6b7280'
-          };
+        };
           border: 3px solid white;
           box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         "></div>
@@ -249,11 +248,11 @@ export default function MapComponent({ vehicles, selectedVehicle, onVehicleClick
       const marker = markersRef.current[vehicle.id];
       marker.setLatLng(position);
       marker.setIcon(icon);
-      
+
       // تحديث محتوى Popup بالبيانات الجديدة
       const popupContent = createPopupContent(vehicle);
       marker.setPopupContent(popupContent);
-      
+
       // إذا كان Popup مفتوح، قم بتحديثه
       if (marker.isPopupOpen()) {
         marker.openPopup();
@@ -261,7 +260,7 @@ export default function MapComponent({ vehicles, selectedVehicle, onVehicleClick
     } else {
       // إنشاء Marker جديد
       const marker = L.marker(position, { icon }).addTo(mapRef.current);
-      
+
       // إضافة Popup
       const popupContent = createPopupContent(vehicle);
       marker.bindPopup(popupContent);
@@ -275,10 +274,10 @@ export default function MapComponent({ vehicles, selectedVehicle, onVehicleClick
   };
 
   return (
-    <div 
-      ref={mapContainerRef} 
+    <div
+      ref={mapContainerRef}
       className="w-full h-full"
-      style={{ 
+      style={{
         zIndex: 0,
         minHeight: '600px',
         height: '100%',

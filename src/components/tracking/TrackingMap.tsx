@@ -40,6 +40,7 @@ export default function TrackingMap({ vehicle, trip, destinationNameAr }: Tracki
   const destinationMarkerRef = useRef<L.Marker | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const leafletRef = useRef<typeof L | null>(null);
+  const hasSetInitialView = useRef(false);
   const [routePolyline, setRoutePolyline] = useState<L.Polyline | null>(null);
 
   // تهيئة الخريطة
@@ -203,12 +204,22 @@ export default function TrackingMap({ vehicle, trip, destinationNameAr }: Tracki
       markerRef.current.setLatLng(position);
     }
 
-    // تحديث عرض الخريطة
-    if (trip?.destinationLat && trip?.destinationLng) {
-      const bounds = L.latLngBounds([position, [trip.destinationLat, trip.destinationLng]]);
-      mapRef.current.fitBounds(bounds, { padding: [50, 50] });
-    } else {
-      mapRef.current.setView(position, 15);
+    // تحديث محتوى الـ Popup إذا كان مفتوحاً
+    if (markerRef.current.isPopupOpen()) {
+      // يمكن تحديث المحتوى هنا لو أردنا، لكن الـ bindPopup يقوم بذلك عند الفتح التالي عادة
+      // للتحديث الفوري نحتاج إلى setPopupContent
+      // ...
+    }
+
+    // تحديث عرض الخريطة مرة واحدة فقط عند التحميل
+    if (!hasSetInitialView.current && position[0] !== 0 && position[1] !== 0) {
+      if (trip?.destinationLat && trip?.destinationLng) {
+        const bounds = L.latLngBounds([position, [trip.destinationLat, trip.destinationLng]]);
+        mapRef.current.fitBounds(bounds, { padding: [50, 50] });
+      } else {
+        mapRef.current.setView(position, 15);
+      }
+      hasSetInitialView.current = true;
     }
   }, [vehicle, trip]);
 
